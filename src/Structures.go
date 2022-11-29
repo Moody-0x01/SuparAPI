@@ -30,6 +30,7 @@ type Post struct {
 type UserLogin struct {
 	Password string `json:"Password"`
 	Email    string `json:"Email"`
+	Token 	 string `json:"T"`
 }
 
 type Response struct {
@@ -54,6 +55,9 @@ func MakeServerResponse(code int, data interface{}) Response {
 			break
 		case Post:
 			Resp.Data = data.(Post)
+			break
+		case UserLogin:
+			Resp.Data = data.(UserLogin)
 			break
 		default:
 			Resp.Data = data.(string)

@@ -48,8 +48,7 @@ func StoreTokenInToken(Token string) (string, error) {
 }
 
 // Extracts the token of the User that needs to be logged in.
-func GetTokenFromJwt(TokenStr string) (string, bool) {
-    
+func GetTokenFromJwt(TokenStr string) (string, bool) { 
     token, err := jwt.Parse(TokenStr, func(token *jwt.Token) (interface{}, error) {
 
         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -76,8 +75,6 @@ func GetTokenFromJwt(TokenStr string) (string, bool) {
 func GetFieldFromContext(c *gin.Context, field string) string {
     return c.Query(field) 
 }
-
-// TODO Generate access Token function
 
 func generateAccessToken(salt string) string {
     /* 
@@ -107,3 +104,23 @@ func generateAccessToken(salt string) string {
     return sha256_(final);
 }
 
+
+func AuthenticateUserJWT(UserJWT string) Response {
+    Token, Ok := GetTokenFromJwt(UserJWT)
+
+    if Ok {
+        User, err := getUserByToken(Token)
+        
+        if err != nil {
+            // a db error.
+            return MakeServerResponse(500, "Db Error. (line 108).")
+        } else {
+            // Returns the user if everything was alright.
+            return MakeServerResponse(200, User)
+        }
+
+    } else {
+        // JWT error
+        return MakeServerResponse(500, "server could not decode the token. (line 117)")
+    }
+}

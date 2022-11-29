@@ -43,84 +43,67 @@ func getUsersRoute(c *gin.Context) {
 func getUserByIdRoute(c *gin.Context) {
 	var uuid string = c.Param("uuid")
 	var User User = getUserById(uuid)
-
 	var res Response = MakeServerResponse(200, User)
-
 	c.JSON(http.StatusOK, res)
 }
 
-/*[ DONE ]*/
-
-/* AUTH. */
-
-func signup(c *gin.Context) {
-}
-
 func login(c *gin.Context) {
-	
-	var User UserLogin;
-	
+	var LoginForm UserLogin;
 	c.BindJSON(&User);
 	
-	// TODO Decode requested data to a User Struct.
-	/*
-	    TODO Check if there is Token, 
-	    if there is then:
-		TODO Verify the token.
-		TODO extract the token data we need to find the current user's data.
-	    else:
-		TODO Authenticate the User and return the user.
-		TODO return response.. {"data": ..., "code": 200|500|201|404}
-		TODO 
-	*/
+	var resp Response
 
-	fmt.Println(User.Email);
-	fmt.Println(User.Password);
-	var resp Response;
-	resp.Code = 200;
-	resp.Data = "Hii It was received.";
-	c.JSON(http.StatusOK, resp);
-
-
-	// if "AccessToken" in request.json:
-	// 		Jwt_token = request.json["AccessToken"]
-	// 		data = VerifyJWT(JWT_SECRET, Jwt_token)
-	// 		if isinstance(data, dict):
-	// 			# Try to get user data to send to my client.
-	// 			accessToken = data['T']
-	// 			User = getUserByAT(accessToken)
-	// 			return MakeServerResponse(200, User)
-	// 		elif isinstance(data, str):
-	// 			# Return an  error code and the error message to the client.
-	// 			return MakeServerResponse(202, data)
-
-	// 	data = ConstructModel(request.json)
-	// 	DB_HANDLER = createNewDbObject()
-	// 	DB_HANDLER.connect()
-	// 	User = DB_HANDLER.AuthenticateUser(data)
-	// 	if User.code == 200:
-	// 		response = User.makeResponse()
+	if len(LoginForm.Token) > 0 {
+		resp = AuthenticateUserJWT(LoginForm.Token)
+	} else {
+		if len(LoginForm.Password) > 0 && len(LoginForm.Email) > 0 {
+			User, Ok := AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
 			
-	// 		AccessToken = {
-	// 			"T": User.data["Token"]
-	// 		}
+			if Ok {
+				resp = MakeServerResponse(200, User)
+			} else {
+				resp = MakeServerResponse(500, "Wrong password!")
+			}
 
-	// 		User.data["Token"] = EncodeJWT(JWT_SECRET, AccessToken)
-	// 		return dumps(response)
+		} else {
+			resp = MakeServerResponse(500, "Missing request attributes, Email or password not specified.")
+		}
+	}
 
-	// 	return dumps(User.makeResponse())
+	c.JSON(http.StatusOK, resp);
 }
 
 
-/* Data base interactors. */
+/*[ DONE ]*/
 
+func SIGNUP(c *gin.Context) {
+	/*
+		
+		Note NEXT TO IMPLEMENT:
+		i create user object.
+		ii Parse the request body to the user object.
+		iii Add the user with AddUser(u User) Function
+		iv if everything was okay and user was added successfully
+			-> then Make the JWT token
+			-> set user.Token send the data with 200 code.
+			if not then:
+			-> MakeServerResponse(500, "was not added because {REASON}")
+	*/
 
-
-
-
-
-
-
-
-
+	/* 
+		BLUEPRINT:
+			def signUp():	
+				data = ConstructModel(request.json)
+				Api_DB_HANDLER.connect()
+				User = Api_DB_HANDLER.AddNewUser(data)
+				if User.code == 200:
+					AccessToken = User.data["T"]
+					User = getUserByAT(AccessToken)
+					User["Token"] = EncodeJWT(JWT_SECRET, {"T": AccessToken})
+					return MakeServerResponse(200, User)
+				return dumps(User.makeResponse())
+			
+	*/
+	fmt.Println("Not Implemented")
+}
 

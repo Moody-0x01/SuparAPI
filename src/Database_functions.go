@@ -70,7 +70,50 @@ func getUserPostById(id string) []Post {
 }
 
 
+func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, bool) {
+	
+	var User User
+	// row, err := dataBase.Query("SELECT ID, EMAIL, PASSWORDHASH, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
+	row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
+	
+	if err != nil {
+		fmt.Println(err)
+		return User, false
+	}
 
+	var pwdHash string
+
+	for row.Next() {
+		row.Scan(&pwdHash)
+	}
+	
+	if sha256_(Pwd) == pwdHash {
+		//TODO Get user.
+		//TODO Return user.
+		row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+
+		if err != nil {
+			return User, false
+		}
+
+		for row.Next() {
+			row.Scan(&User.Id_, &User.Email, &User.UserName, &User.Token, &User.Img, &User.Bg,  &User.Bio, &User.Address)
+		}
+
+		JWT, Ok := StoreTokenInToken(User.Token)
+
+		if Ok {
+			User.Token = JWT
+			return User, true
+		} else {
+			var EmptyUser User
+			return EmptyUser, false
+		}
+
+	} else {
+		return User, false
+	}
+}
 
 /*-------------------------------------------------------------------------------------------------------------------------------
  	USERS
@@ -87,27 +130,29 @@ func getUserById(id string) User {
 	}
 
 	for row.Next() {
-		row.Scan(&User.Id_, &User.UserName, &User.Img, &User.Bg, &User.Bio, &User.Address)
+		row.Scan(&User.Id_, &User.UserName,&User.Img, &User.Bg, &User.Bio, &User.Address)
 	}
+
+
 
 	return User
 }
 
-func getUserByToken(Token string) User {
+func getUserByToken(Token string) User, error {
 	var User User
 
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
 	if err != nil {
 		fmt.Println(err)
-		return User
+		return User, err
 	}
 
 	for row.Next() {
 		row.Scan(&User.Id_, &User.UserName, &User.Img, &User.Bg, &User.Bio, &User.Address)
 	}
 
-	return User
+	return User, nil
 }
 
 func getUsers() []User {
@@ -184,18 +229,18 @@ func CheckUser(Email string) bool {
 		
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 	
-	var u []Users;
+	var u []User;
 
 	if err != nil {
 		fmt.Println(err)
-		return Users
+		return false
 	}
 
 	var temp User
 
 	for row.Next() {	
 		row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-		Users = append(u, temp)	
+		u = append(u, temp)	
 	}
 
 	if len(u) == 1 {
@@ -205,7 +250,6 @@ func CheckUser(Email string) bool {
 	} else {
 		return true
 	}
-
 }
 
 func AddUser(user User) Response {
@@ -217,15 +261,19 @@ func AddUser(user User) Response {
 		generating a token and assigning it to the user before adding
 	*/
 
-	var res Response
+	
 
 	if CheckUser(user.Email) {
 		var Token string = generateAccessToken(user.Email)
 
 		stmt, _ := dataBase.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
-		_, err := stmt.Exec(user.Email, user.UserName, user.Password, Token, user.Img, user.Bio, user.Bg, user.Address)
+		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, user.Img, user.Bio, user.Bg, user.Address)
 		
-		res = MakeServerResponse(200, Token)
+		if err != nil {
+			return MakeServerResponse(200, err)
+		}
+
+		return MakeServerResponse(200, Token)
 		
 		/* 
 			IN SIGNUP:
@@ -236,32 +284,10 @@ func AddUser(user User) Response {
 		*/
 
 	} else {
-		res = MakeServerResponse(500, "This user already exists..")
+		return MakeServerResponse(500, "This user already exists..")
 	}
 
-	
-
 }
-
-func addContact(c *gin.Context, json *HzJson) {
-	//
-	FullName, _ := json.getAttribute("FullName");
-	Email, _ := json.getAttribute("Email");
-	Message, _ := json.getAttribute("Message");
-	
-	
-
-	if err != nil {
-
-		c.JSON(http.StatusOK, newResp("Erreur Base de donne"))
-		return
-	}
-
-	
-
-}
-
-
 
 
 

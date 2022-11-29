@@ -15,26 +15,14 @@ func run() {
 	router := gin.Default()
 	router.Use(cors.Default())
 	
-	/* 
-	router.POST("/Hello_world", Hello_world)
-	router.POST("/signup", signup) 
-	*/
+
 	
 	router.POST("/login", login)
+	router.POST("/Test", LOGIN)
 	router.GET("/getUserPosts", getUserPostsRoute)
 	router.GET("/GetAllPosts", GetAllPostsRoute)
 	router.GET("/query", getUsersRoute)
 	router.GET("/:uuid", getUserByIdRoute)
-	
-	/*
-		router.POST("/UpdateUserImage", UpdateUserImage)
-		router.POST("/UpdateUserBackground", UpdateUserBackground)
-		router.POST("/query", query)
-		router.POST("/MakePost", MakePost)
-		router.POST("/GetAllPosts", GetAllPosts)
-		router.POST("/Update", Update)
-		router.POST("/getUserPosts", getUserPosts)
-	*/
 
 	fmt.Println("Serving in port 8888")
 	router.Run(":8888")
