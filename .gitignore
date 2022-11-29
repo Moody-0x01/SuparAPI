@@ -1,0 +1,16 @@
+# Database files
+/src/db/*
+/db
+db
+# Testing modules and scripts
+*Test*
+
+
+
+
+
+
+
+
+
+

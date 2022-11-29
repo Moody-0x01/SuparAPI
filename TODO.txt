@@ -1,0 +1,26 @@
+TODO for the go api:
+	
+	- WEB API -
+	[ ] [0] -> "/signup"
+	[ ] [1] -> "/login"
+	[ ] [2] -> "/UpdateUserImage"
+	[ ] [3] -> "/UpdateUserBackground"
+	[*] [4] -> "/query"
+	[ ] [5] -> "/MakePost"
+	[*] [6] -> "/GetAllPosts"
+	[ ] [7] -> "/Update"
+	[*] [8] -> "/getUserPosts"
+	[*] [9] -> "/<user_id>"
+	
+	- APPLICATION LAYER API -
+
+	[*] [0] MakeServerResponse
+	[*] [1] getUserByAT
+	[*] [2] VerifyJWT
+	[*] [3]	EncodeJWT
+	[*] [4] HashPassword
+	[ ] [5] verifyUserPassword
+	[*] [6] getPostsById
+	[*] [7] GetUserByAccessToken :)
+
+
