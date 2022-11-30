@@ -38,7 +38,7 @@ func sha256_(s string) string {
 
 // Makes a jwt that stores data to be sent to the client.
 func StoreTokenInToken(Token string) (string, error) {
-    
+ 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
         "T": Token,
     })
@@ -124,3 +124,5 @@ func AuthenticateUserJWT(UserJWT string) Response {
         return MakeServerResponse(500, "server could not decode the token. (line 117)")
     }
 }
+
+func isEmpty(s string) bool { return len(s) == 0 }

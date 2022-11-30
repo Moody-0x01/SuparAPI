@@ -6,8 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*[ DONE ]*/
-
 func GetAllPostsRoute(c *gin.Context) {
 	All := GetAllPosts()
 	
@@ -47,22 +45,29 @@ func getUserByIdRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+/* AUTHENTICATION AND OPERATIONS */
+/*
+Implemented: Login, Sign Up.
+Not implemented: data access (Update, add, delete)
+*/
 func login(c *gin.Context) {
 	var LoginForm UserLogin;
-	c.BindJSON(&User);
+	
+	c.BindJSON(&LoginForm);
 	
 	var resp Response
-
+	
 	if len(LoginForm.Token) > 0 {
 		resp = AuthenticateUserJWT(LoginForm.Token)
 	} else {
 		if len(LoginForm.Password) > 0 && len(LoginForm.Email) > 0 {
-			User, Ok := AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
+			User, err := AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
 			
-			if Ok {
+			if err.Ok {
 				resp = MakeServerResponse(200, User)
 			} else {
-				resp = MakeServerResponse(500, "Wrong password!")
+				resp = MakeServerResponse(500, err.Text)
+				fmt.Println("", resp.Data)
 			}
 
 		} else {
@@ -74,36 +79,21 @@ func login(c *gin.Context) {
 }
 
 
-/*[ DONE ]*/
-
-func SIGNUP(c *gin.Context) {
-	/*
-		
-		Note NEXT TO IMPLEMENT:
-		i create user object.
-		ii Parse the request body to the user object.
-		iii Add the user with AddUser(u User) Function
-		iv if everything was okay and user was added successfully
-			-> then Make the JWT token
-			-> set user.Token send the data with 200 code.
-			if not then:
-			-> MakeServerResponse(500, "was not added because {REASON}")
-	*/
-
-	/* 
-		BLUEPRINT:
-			def signUp():	
-				data = ConstructModel(request.json)
-				Api_DB_HANDLER.connect()
-				User = Api_DB_HANDLER.AddNewUser(data)
-				if User.code == 200:
-					AccessToken = User.data["T"]
-					User = getUserByAT(AccessToken)
-					User["Token"] = EncodeJWT(JWT_SECRET, {"T": AccessToken})
-					return MakeServerResponse(200, User)
-				return dumps(User.makeResponse())
-			
-	*/
-	fmt.Println("Not Implemented")
+func signUp(c *gin.Context) {
+	var newUser User
+	
+	c.BindJSON(&newUser);
+	
+	if isEmpty(newUser.Email) || isEmpty(newUser.PasswordHash) || isEmpty(newUser.UserName) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "The server could not get the Email, password or user name. please check your request then try again L86"))
+	} else {
+		newUser.setDefaults();
+		// Hash the password.
+		newUser.PasswordHash = sha256_(newUser.PasswordHash)
+		fmt.Println(newUser.PasswordHash)
+		var Resp Response = AddUser(newUser) // Creates the user and sets the Token.
+		c.JSON(http.StatusOK, Resp)
+	}
+	
 }
 

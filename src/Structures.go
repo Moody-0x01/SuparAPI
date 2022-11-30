@@ -1,5 +1,11 @@
 package main
 
+// Default fields for the user object.
+var DefaultUserImg string = "/img/defUser.jpg"
+var DefaultUserBg string = "/img/defBg.jpg"
+var DefaultUserBio string = "Wait for it to load :)"
+var DefaultUserAddress string = "Everywhere"
+
 
 type User struct {
 	Id_ 		 int `json:"id_"`
@@ -13,6 +19,40 @@ type User struct {
 	Address		 string `json:"addr"`
 }
 
+
+func (U *User) setDefaults() {
+	//TODO Setting the default fields to add to the db if some are not present.
+	/*
+	THOSE ARE THE FIELDS TO BE CHANGED if they were not set.
+		Img 		 string `json:"img"`
+		Bg 			 string `json:"bg"`
+		Bio 		 string `json:"bio"`
+		Address		 string `json:"addr"`
+	*/
+	
+	if isEmpty(U.Img) {
+		U.Img = DefaultUserImg
+	}
+	
+	if isEmpty(U.Bg) {
+		U.Bg = DefaultUserBg
+	}
+	
+	if isEmpty(U.Bio) {
+		U.Bio = DefaultUserBio
+	}
+
+	if isEmpty(U.Address) {
+		U.Address = DefaultUserAddress
+	}
+}
+
+
+
+type Error struct {
+	Ok   bool `json:"ok"`
+	Text string `json:"text"`
+}
 
 type ID struct {
 	Id_ int `json:"id_"`
@@ -67,7 +107,12 @@ func MakeServerResponse(code int, data interface{}) Response {
 	return Resp
 }
 
-
+func MakeServerError(ok bool, t string) Error {
+	var e Error
+	e.Ok = ok
+	e.Text = t
+	return e
+}
 
 
 

@@ -32,6 +32,8 @@ func GetAllPosts() []Post {
 
 	row, err := dataBase.Query("SELECT Text, IMG FROM POSTS ORDER BY ID DESC")
 	
+	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
 		return Posts
@@ -54,6 +56,8 @@ func getUserPostById(id string) []Post {
 
 	row, err := dataBase.Query("SELECT Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
+	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
 		return Posts
@@ -70,15 +74,19 @@ func getUserPostById(id string) []Post {
 }
 
 
-func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, bool) {
+
+func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
 	
-	var User User
+	var user User
+
 	// row, err := dataBase.Query("SELECT ID, EMAIL, PASSWORDHASH, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
 	row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
 	
+	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
-		return User, false
+		return user, MakeServerError(false, "Could not get user from db. 82")
 	}
 
 	var pwdHash string
@@ -92,27 +100,29 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, bool) {
 		//TODO Return user.
 		row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 
+		defer row.Close()
+
 		if err != nil {
-			return User, false
+			return user, MakeServerError(false, "Could not get user from db. 97")
 		}
 
 		for row.Next() {
-			row.Scan(&User.Id_, &User.Email, &User.UserName, &User.Token, &User.Img, &User.Bg,  &User.Bio, &User.Address)
+			row.Scan(&user.Id_, &user.Email, &user.UserName, &user.Token, &user.Img, &user.Bg,  &user.Bio, &user.Address)
 		}
 
-		JWT, Ok := StoreTokenInToken(User.Token)
+		JWT, err := StoreTokenInToken(user.Token)
 
-		if Ok {
-			User.Token = JWT
-			return User, true
-		} else {
-			var EmptyUser User
-			return EmptyUser, false
+		if err == nil {
+			user.Token = JWT
+			return user, MakeServerError(true, "User created! you can login now..")
 		}
 
-	} else {
-		return User, false
+		var EmptyUser User
+		return EmptyUser, MakeServerError(false, "Server had a problem encoding the token..")
+
 	}
+	
+	return user, MakeServerError(false, "incorrect password. try again")
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +133,7 @@ func getUserById(id string) User {
 	var User User
 
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
-	
+	defer row.Close()
 	if err != nil {
 		fmt.Println(err)
 		return User
@@ -138,11 +148,13 @@ func getUserById(id string) User {
 	return User
 }
 
-func getUserByToken(Token string) User, error {
+func getUserByToken(Token string) (User, error) {
 	var User User
 
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
+	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
 		return User, err
@@ -158,7 +170,7 @@ func getUserByToken(Token string) User, error {
 func getUsers() []User {
 	var Users []User
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
-	
+	defer row.Close()
 	if err != nil {
 		fmt.Println(err)
 		return Users
@@ -181,7 +193,9 @@ func getUsersByQuery(Q string) []User {
 	var Users []User
 	var NewQ string = "%" + Q + "%"
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
-	
+
+	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
 		return Users
@@ -211,7 +225,7 @@ func GetUserByToken(Token string) User {
 	var User User;
 	
 	row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
-	
+	defer row.Close()
 	if err != nil {
 		fmt.Println(err)
 		return User
@@ -227,8 +241,8 @@ func GetUserByToken(Token string) User {
 
 func CheckUser(Email string) bool {
 		
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
-	
+	row, err := dataBase.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+	defer row.Close()
 	var u []User;
 
 	if err != nil {
@@ -253,6 +267,7 @@ func CheckUser(Email string) bool {
 }
 
 func AddUser(user User) Response {
+	
 	/* 
 	- Check if the email associated with the request already exists.
 		if it exists return an error code and a string.
@@ -263,34 +278,39 @@ func AddUser(user User) Response {
 
 	
 
-	if CheckUser(user.Email) {
-		var Token string = generateAccessToken(user.Email)
+	if !CheckUser(user.Email) {
 
+		var Token string = generateAccessToken(user.Email)
 		stmt, _ := dataBase.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, user.Img, user.Bio, user.Bg, user.Address)
 		
 		if err != nil {
-			return MakeServerResponse(200, err)
+			return MakeServerResponse(500, "Could not add to db.")
 		}
 
-		return MakeServerResponse(200, Token)
-		
-		/* 
-			IN SIGNUP:
-				AccessToken = User.data["T"] # Gets the token that was generated.
-				User = getUserByAT(AccessToken) # Gets the User.
-				User["Token"] = EncodeJWT(JWT_SECRET, {"T": AccessToken}) # Generates a JWT for the user to be returned.
-				return MakeServerResponse(200, User) # Sends data.
-		*/
+		FetchedUser, err := getUserByToken(Token)
 
-	} else {
-		return MakeServerResponse(500, "This user already exists..")
+		if err != nil {
+			return MakeServerResponse(500, "Could not get created user from db. L288")
+		} else {
+			
+			JWT, err := StoreTokenInToken(Token)
+			
+			if err != nil {
+				fmt.Println(err)
+				return MakeServerResponse(500, "The server had a problem making the jwt token.")
+			}
+
+			fmt.Println("JWT: ", JWT)
+
+			FetchedUser.Token = JWT;
+			return MakeServerResponse(200, FetchedUser) // Success.
+		}
+
 	}
 
+	return MakeServerResponse(500, "This user already exists..")
 }
-
-
-
 
 // /*-------------------------------------------------------------------------------------------------------------------------------
 // Get Specific rows with a condition.

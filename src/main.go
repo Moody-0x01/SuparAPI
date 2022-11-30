@@ -10,22 +10,22 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
+var (
+	port string = ":8888"
+)
+
 func run() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Use(cors.Default())
-	
-
-	
+	router.Use(cors.Default())	
 	router.POST("/login", login)
-	router.POST("/Test", LOGIN)
 	router.GET("/getUserPosts", getUserPostsRoute)
 	router.GET("/GetAllPosts", GetAllPostsRoute)
 	router.GET("/query", getUsersRoute)
 	router.GET("/:uuid", getUserByIdRoute)
-
-	fmt.Println("Serving in port 8888")
-	router.Run(":8888")
+	router.POST("/signup", signUp)
+	fmt.Println("Serving in port", port)
+	router.Run(port)
 }
 
 
