@@ -2,12 +2,15 @@
 
 # Go Api
 
-### The Core functionalities
+### Routes
 
-- User authentication using JWT and routes such as `/Login` `/signup`
-- Users Lookup `/query?q={TXT}` `/:uuid`
-- Get/Add User posts using the Token `/GetAllPosts` `/getUserPosts` `/MakePost`
-- Update user data (Background image, avatar, Email, UserName) `NOT IMPLEMENTED.`
+NOTE: This section will be updated regularily once I add or remove a route.
+- `/login` Login, can get a token or (password, Email) and if everything is valid it returns user info + Token.
+- `/getUserPosts` return the user's posts, and it gets an id_ form value as uuid.
+- `/GetAllPosts` return all the posts from db.
+- `/query` used to query a specific user. if not found then an empty list is returned or an error response code.
+- `/:uuid` quick user lookup by uuid.
+- `/signup` making an account. then returning the token to update, delete, add and other operation regarding ur account.
 
 ### Files and folders
 
