@@ -17,8 +17,32 @@ NOTE: This section will be updated regularily once I add or remove a route.
 
 ### Database (Tables and schema.)
 
-the database has 2 table at the moment.
-USERS -> 
+I have used only 2 tables just because I did not want to overcomplicate things, but more will be added as m progressing in this project.
+```sql
+
+    CREATE TABLE USERS (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT, 
+        EMAIL TEXT, 
+        USERNAME TEXT, 
+        PASSWORDHASH TEXT, 
+        TOKEN TEXT, 
+        IMG TEXT DEFAULT null,
+        BG TEXT DEFAULT null,
+        BIO TEXT DEFAULT null,
+        ADDR TEXT DEFAULT null
+    );
+
+    CREATE TABLE POSTS (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        USER_ID INTEGER,
+        Text TEXT,
+        IMG TEXT,
+        LIKES INTEGER DEFAULT 0
+    );
+
+```
+
+
 
 ### Files and folders
 
@@ -32,12 +56,6 @@ USERS ->
     3. generate secret token for users.
 - `src\Database_functions` contains database functionality, given a global *sql.db* object to perform sqlite query.
 - `src\Db_setup.go` Initializes the database global connection. if there is an error connecting to the db, the api would not work.
-
-
-
-
-
-
 
 
 
