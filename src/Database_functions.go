@@ -313,7 +313,7 @@ func AddUser(user User) Response {
 }
 
 
-func updateUser(field string, newValue string, Token string) (e Error) {
+func updateUser(field string, newValue string, Token string) Error {
 	
 	stmt, _ := dataBase.Prepare("UPDATE USERS SET ?=? WHERE TOKEN=?")
 	_, err := stmt.Exec(field, newValue, Token)
@@ -323,6 +323,19 @@ func updateUser(field string, newValue string, Token string) (e Error) {
 	}
 
 	return MakeServerError(true, "success!")
+}
+
+
+func AddPost(Text string, Img string, uuid int) Error {
+
+	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG) VALUES(?, ?, ?)")
+	_, err := stmt.Exec(uuid, Text, Img)
+	if err != nil {
+		return MakeServerError(false, "could not add post. err L334")
+	}
+
+	return MakeServerError(true, "success!")
+	
 }
 
 

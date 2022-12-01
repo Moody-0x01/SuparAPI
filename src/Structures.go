@@ -62,10 +62,23 @@ type Query struct {
 	Query_ int `json:"query"`
 }
 
+// for fetch posts
 type Post struct {
+	Id_  int 	`json:"id"`
+	Uid_ int 	`json:"uuid"`
 	Text string `json:"text"`
 	Img	 string `json:"img"`
 }
+
+// for securly adding posts.
+type TokenizedPost struct {
+	Token string `json:"Token"`
+	uuid  string `json:"uuid"`
+	Text  string `json:"text"`
+	Img   string `json:"img"`
+}
+
+
 
 type UserLogin struct {
 	Password string `json:"Password"`

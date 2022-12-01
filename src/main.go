@@ -18,12 +18,17 @@ func run() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(cors.Default())	
+	// POST routes.
 	router.POST("/login", login)
+	router.POST("update", update)
+	router.POST("/NewPost", NewPost)
+	router.POST("/signup", signUp)
+
+	// Get routes.
 	router.GET("/getUserPosts", getUserPostsRoute)
 	router.GET("/GetAllPosts", GetAllPostsRoute)
 	router.GET("/query", getUsersRoute)
 	router.GET("/:uuid", getUserByIdRoute)
-	router.POST("/signup", signUp)
 	fmt.Println("Serving in port", port)
 	router.Run(port)
 }

@@ -109,6 +109,7 @@ func update(c *gin.Context) {
 	// Bg 			 string `json:"bg"`
 	// Bio 		 string `json:"bio"`
 	// Address		 string `json:"addr"`
+
 	var Data User
 	c.BindJSON(&Data)
 	if len(Data.Token) > 0 {
@@ -153,8 +154,47 @@ func update(c *gin.Context) {
 	c.JSON(http.StatusOK, MakeServerResponse(500, "No token was provided in the request. try agin with a token."))
 }
 
-
-func AddPost(c *gin.Context) {
+func NewPost(c *gin.Context) {
+	/*
+	Expectation:
+		json = {
+			"Token": v,
+			"uuid": v,
+			"text": v,
+			"img": v
+		}
+	*/
 	// This function creates a post for the user.
+	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
+	// USER_ID INTEGER,
+	// Text TEXT,
+	// IMG TEXT,
 
+	var post TokenizedPost
+	c.BindJSON( &post )
+	
+	if isEmpty(post.Token) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "no Token provided, try providing your secure token."))
+	}
+
+	if isEmpty(post.uuid) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "uuid field not present: Provide uuid"))
+	}
+
+	if isEmpty(post.Text) && isEmpty(post.Img) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "img and text are empty, provide some text for the post or an img"))
+	}
+
+	AccessToken, Ok := GetTokenFromJwt(Data.Token)
+
+	if Ok {
+		err := AddPost(post.Text, post.Img, post.uuid)
+		if err.Ok {
+			c.JSON(http.StatusOK, MakeServerResponse(200, "success, added."))
+		}
+
+		c.JSON(http.StatusOK, MakeServerResponse(500, "the user was not added. problem in db."))
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(500, "invalid access token. try with a valid token."))
 }
