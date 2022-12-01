@@ -2,15 +2,11 @@
 /src/db/*
 /db
 db
+
 # Testing modules and scripts
 *Test*
 
-
-
-
-
-
-
-
-
-
+# binary builds
+/src/build
+build
+*.exe

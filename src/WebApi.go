@@ -56,7 +56,7 @@ func login(c *gin.Context) {
 	c.BindJSON(&LoginForm);
 	
 	var resp Response
-	
+
 	if len(LoginForm.Token) > 0 {
 		resp = AuthenticateUserJWT(LoginForm.Token)
 	} else {
@@ -97,3 +97,64 @@ func signUp(c *gin.Context) {
 	
 }
 
+/*------------------------------------------------------------------------------------------------------------------------*/
+
+//TODO Make AddPost function.
+//TODO Make update generic function.
+
+func update(c *gin.Context) {
+	// This function can update. -bg, -bio, -img, -username
+	// Token 		 string `json:"token"`
+	// Img 		 string `json:"img"`
+	// Bg 			 string `json:"bg"`
+	// Bio 		 string `json:"bio"`
+	// Address		 string `json:"addr"`
+	var Data User
+	c.BindJSON(&Data)
+	if len(Data.Token) > 0 {
+		AccessToken, Ok := GetTokenFromJwt(Data.Token)
+		if Ok {
+
+			var Ok bool = true;
+
+			if !isEmpty(Data.Img) {
+				e :=updateUser("IMG", Data.Img, AccessToken)
+				Ok = e.Ok
+			}
+
+			if !isEmpty(Data.Bio) {
+				e :=updateUser("BIO", Data.Bio, AccessToken)
+				Ok = e.Ok
+			}
+
+			if !isEmpty(Data.Address){
+				e :=updateUser("ADDR", Data.Address, AccessToken)
+				Ok = e.Ok
+			}
+
+			if !isEmpty(Data.Bg) {
+				e :=updateUser("BG", Data.Bg, AccessToken)
+				Ok = e.Ok
+			}
+
+			if Ok {
+				c.JSON(http.StatusOK, MakeServerResponse(200, "Updated!"))		
+			} else {
+				c.JSON(http.StatusOK, MakeServerResponse(500, "Something went wrong.! 143"))
+			}
+			
+
+		} else {
+			// return error. invalid token.
+			c.JSON(http.StatusOK, MakeServerResponse(500, "The Token you have specified is invalid, try with other."))
+		}
+	}
+	
+	c.JSON(http.StatusOK, MakeServerResponse(500, "No token was provided in the request. try agin with a token."))
+}
+
+
+func AddPost(c *gin.Context) {
+	// This function creates a post for the user.
+
+}

@@ -312,6 +312,28 @@ func AddUser(user User) Response {
 	return MakeServerResponse(500, "This user already exists..")
 }
 
+
+func updateUser(field string, newValue string, Token string) (e Error) {
+	
+	stmt, _ := dataBase.Prepare("UPDATE USERS SET ?=? WHERE TOKEN=?")
+	_, err := stmt.Exec(field, newValue, Token)
+
+	if err != nil {
+		return MakeServerError(false, "db err, could not update.")
+	}
+
+	return MakeServerError(true, "success!")
+}
+
+
+
+
+
+
+
+
+
+
 // /*-------------------------------------------------------------------------------------------------------------------------------
 // Get Specific rows with a condition.
 // ---------------------------------------------------------------------------------------------------------------------------------------*/

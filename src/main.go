@@ -29,6 +29,12 @@ func run() {
 }
 
 
+
+
+
+
+
+
 func main() {
 
 	err := initializeDb();
