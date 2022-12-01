@@ -110,7 +110,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
 			row.Scan(&user.Id_, &user.Email, &user.UserName, &user.Token, &user.Img, &user.Bg,  &user.Bio, &user.Address)
 		}
 
-		JWT, err := StoreTokenInToken(user.Token)
+		JWT, err := StoreTokenInJWT(user.Token)
 
 		if err == nil {
 			user.Token = JWT
@@ -294,7 +294,7 @@ func AddUser(user User) Response {
 			return MakeServerResponse(500, "Could not get created user from db. L288")
 		} else {
 			
-			JWT, err := StoreTokenInToken(Token)
+			JWT, err := StoreTokenInJWT(Token)
 			
 			if err != nil {
 				fmt.Println(err)
@@ -315,14 +315,44 @@ func AddUser(user User) Response {
 
 func updateUser(field string, newValue string, Token string) Error {
 	
-	stmt, _ := dataBase.Prepare("UPDATE USERS SET ?=? WHERE TOKEN=?")
-	_, err := stmt.Exec(field, newValue, Token)
+	var ok bool;
+	var Query string
 
-	if err != nil {
-		return MakeServerError(false, "db err, could not update.")
+	switch field {
+		case "IMG":
+			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
+			ok = true
+			break		
+		case "BIO":
+			Query = "UPDATE USERS SET BIO=? WHERE TOKEN=?"
+			ok = true
+			break	
+		case "ADDR":
+			Query = "UPDATE USERS SET ADDR=? WHERE TOKEN=?"
+			ok = true
+			break		
+		case "BG":
+			Query = "UPDATE USERS SET BG=? WHERE TOKEN=?"
+			ok = true
+			break
+		default:
+			ok = false
+			break
 	}
 
-	return MakeServerError(true, "success!")
+	if ok {
+
+		stmt, _ := dataBase.Prepare(Query)
+		_, err := stmt.Exec(newValue, Token)
+
+		if err != nil {
+			return MakeServerError(false, "db err, could not update.")
+		}	
+
+		return MakeServerError(true, "success!")
+	}
+
+	return MakeServerError(false, "Unexpected field name.")
 }
 
 
@@ -335,7 +365,7 @@ func AddPost(Text string, Img string, uuid int) Error {
 	}
 
 	return MakeServerError(true, "success!")
-	
+
 }
 
 

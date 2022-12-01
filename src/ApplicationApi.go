@@ -37,7 +37,7 @@ func sha256_(s string) string {
 }
 
 // Makes a jwt that stores data to be sent to the client.
-func StoreTokenInToken(Token string) (string, error) {
+func StoreTokenInJWT(Token string) (string, error) {
  
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
         "T": Token,

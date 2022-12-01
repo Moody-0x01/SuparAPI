@@ -119,17 +119,17 @@ func update(c *gin.Context) {
 			var Ok bool = true;
 
 			if !isEmpty(Data.Img) {
-				e :=updateUser("IMG", Data.Img, AccessToken)
+				e := updateUser("IMG", Data.Img, AccessToken)
 				Ok = e.Ok
 			}
 
 			if !isEmpty(Data.Bio) {
-				e :=updateUser("BIO", Data.Bio, AccessToken)
+				e := updateUser("BIO", Data.Bio, AccessToken)
 				Ok = e.Ok
 			}
 
 			if !isEmpty(Data.Address){
-				e :=updateUser("ADDR", Data.Address, AccessToken)
+				e := updateUser("ADDR", Data.Address, AccessToken)
 				Ok = e.Ok
 			}
 
@@ -139,15 +139,17 @@ func update(c *gin.Context) {
 			}
 
 			if Ok {
-				c.JSON(http.StatusOK, MakeServerResponse(200, "Updated!"))		
+				c.JSON(http.StatusOK, MakeServerResponse(200, "Updated!"))
+				return
 			} else {
 				c.JSON(http.StatusOK, MakeServerResponse(500, "Something went wrong.! 143"))
+				return
 			}
-			
 
 		} else {
 			// return error. invalid token.
 			c.JSON(http.StatusOK, MakeServerResponse(500, "The Token you have specified is invalid, try with other."))
+			return
 		}
 	}
 	
@@ -171,29 +173,37 @@ func NewPost(c *gin.Context) {
 	// IMG TEXT,
 
 	var post TokenizedPost
-	c.BindJSON( &post )
+	c.BindJSON(&post)
 	
 	if isEmpty(post.Token) {
 		c.JSON(http.StatusOK, MakeServerResponse(500, "no Token provided, try providing your secure token."))
+		return
 	}
 
-	if isEmpty(post.uuid) {
+	if post.Uuid == 0 {
 		c.JSON(http.StatusOK, MakeServerResponse(500, "uuid field not present: Provide uuid"))
+		return
 	}
 
 	if isEmpty(post.Text) && isEmpty(post.Img) {
 		c.JSON(http.StatusOK, MakeServerResponse(500, "img and text are empty, provide some text for the post or an img"))
+		return
 	}
 
-	AccessToken, Ok := GetTokenFromJwt(Data.Token)
+	_, Ok := GetTokenFromJwt(post.Token)
+	
+
 
 	if Ok {
-		err := AddPost(post.Text, post.Img, post.uuid)
+		err := AddPost(post.Text, post.Img, post.Uuid)
+
 		if err.Ok {
 			c.JSON(http.StatusOK, MakeServerResponse(200, "success, added."))
+			return
 		}
-
+		
 		c.JSON(http.StatusOK, MakeServerResponse(500, "the user was not added. problem in db."))
+		return
 	}
 
 	c.JSON(http.StatusOK, MakeServerResponse(500, "invalid access token. try with a valid token."))

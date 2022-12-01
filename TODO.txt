@@ -1,14 +1,14 @@
 TODO for the go api:
 	
 	- WEB API -
-	[ ] [0] -> "/signup"
-	[ ] [1] -> "/login"
-	[ ] [2] -> "/UpdateUserImage"
-	[ ] [3] -> "/UpdateUserBackground"
+	[*] [0] -> "/signup"
+	[*] [1] -> "/login"
+	[*] [2] -> "/UpdateUserImage"
+	[*] [3] -> "/UpdateUserBackground"
 	[*] [4] -> "/query"
-	[ ] [5] -> "/MakePost"
+	[*] [5] -> "/MakePost"
 	[*] [6] -> "/GetAllPosts"
-	[ ] [7] -> "/Update"
+	[*] [7] -> "/Update"
 	[*] [8] -> "/getUserPosts"
 	[*] [9] -> "/<user_id>"
 	
@@ -19,8 +19,8 @@ TODO for the go api:
 	[*] [2] VerifyJWT
 	[*] [3]	EncodeJWT
 	[*] [4] HashPassword
-	[ ] [5] verifyUserPassword
+	[*] [5] verifyUserPassword
 	[*] [6] getPostsById
 	[*] [7] GetUserByAccessToken :)
 
-
+	YEA I DONE EVERYTHING.. I need a new todo.

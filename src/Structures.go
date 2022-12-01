@@ -11,7 +11,7 @@ type User struct {
 	Id_ 		 int `json:"id_"`
 	Email 		 string `json:"Email"`
 	UserName 	 string `json:"UserName"`
-	PasswordHash string `json:"PasswordHash"`
+	PasswordHash string `json:"Password"`
 	Token 		 string `json:"token"`
 	Img 		 string `json:"img"`
 	Bg 			 string `json:"bg"`
@@ -72,8 +72,8 @@ type Post struct {
 
 // for securly adding posts.
 type TokenizedPost struct {
-	Token string `json:"Token"`
-	uuid  string `json:"uuid"`
+	Token string `json:"token"`
+	Uuid  int `json:"uuid"`
 	Text  string `json:"text"`
 	Img   string `json:"img"`
 }
@@ -97,21 +97,27 @@ func MakeServerResponse(code int, data interface{}) Response {
 	Resp.Code = code
 
 	switch data.(type) {
+		
 		case []Post:
 			Resp.Data = data.([]Post)
 			break
+
 		case []User:
 			Resp.Data = data.([]User)
 			break
+
 		case User:
 			Resp.Data = data.(User)
 			break
+
 		case Post:
 			Resp.Data = data.(Post)
 			break
+
 		case UserLogin:
 			Resp.Data = data.(UserLogin)
 			break
+			
 		default:
 			Resp.Data = data.(string)
 			break
