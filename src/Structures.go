@@ -20,6 +20,16 @@ type User struct {
 }
 
 
+// for fetch posts
+type Post struct {
+	Id_  int 	`json:"id"`
+	Uid_ int 	`json:"uuid"`
+	Text string `json:"text"`
+	Img	 string `json:"img"`
+	user User   `json:"user"` 
+}
+
+
 func (U *User) setDefaults() {
 	//TODO Setting the default fields to add to the db if some are not present.
 	/*
@@ -60,14 +70,6 @@ type ID struct {
 
 type Query struct {
 	Query_ int `json:"query"`
-}
-
-// for fetch posts
-type Post struct {
-	Id_  int 	`json:"id"`
-	Uid_ int 	`json:"uuid"`
-	Text string `json:"text"`
-	Img	 string `json:"img"`
 }
 
 // for securly adding posts.
