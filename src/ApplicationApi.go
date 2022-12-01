@@ -64,7 +64,14 @@ func GetTokenFromJwt(TokenStr string) (string, bool) {
     }
 
     if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-        return claims["T"].(string), true
+        t, err := b64.StdEncoding.DecodeString(claims["T"].(string))
+       
+        if err != nil {
+            return "", false
+        }
+
+        return string(t), true
+
     } else {
 	   // Invalid Token, return false.
         return "", false
@@ -109,14 +116,14 @@ func AuthenticateUserJWT(UserJWT string) Response {
     Token, Ok := GetTokenFromJwt(UserJWT)
 
     if Ok {
-        User, err := getUserByToken(Token)
-        
+        user, err := getUserByToken(Token)
+
         if err != nil {
             // a db error.
             return MakeServerResponse(500, "Db Error. (line 108).")
         } else {
             // Returns the user if everything was alright.
-            return MakeServerResponse(200, User)
+            return MakeServerResponse(200, user)
         }
 
     } else {

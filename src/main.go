@@ -30,15 +30,9 @@ func run() {
 	router.GET("/query", getUsersRoute)
 	router.GET("/:uuid", getUserByIdRoute)
 	fmt.Println("Serving in port", port)
+
 	router.Run(port)
 }
-
-
-
-
-
-
-
 
 func main() {
 

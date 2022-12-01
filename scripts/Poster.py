@@ -39,7 +39,7 @@ ROUTE:
 
 from requests import post
 from base64 import b64encode
-TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJUIjoiNzM3Y2UxZWMwYmZkZmQyNDUyMWVhZWUxNzU0YzE4YWQ2MWRmZWYxYTNjMGJhOTcyNjBmZTE5ZWY4MGQwYTJlNiJ9.A6BKhdwW52KXRRO-RS6nKR46o0l5c6KNLXsq2xkpbD0'
+GUKU_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJUIjoiNzM3Y2UxZWMwYmZkZmQyNDUyMWVhZWUxNzU0YzE4YWQ2MWRmZWYxYTNjMGJhOTcyNjBmZTE5ZWY4MGQwYTJlNiJ9.A6BKhdwW52KXRRO-RS6nKR46o0l5c6KNLXsq2xkpbD0'
 UUID = 1714
 Url = "http://localhost:8888/"
 sign_up = f"{Url}signup"
@@ -47,11 +47,12 @@ login = f"{Url}login"
 addPost = f"{Url}NewPost"
 update = f"{Url}update"
 
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJUIjoiTkdGbE1EVmhZamRrWkRZM09UUmhaV1l5TVRGaU5EaG1aakEzT0RJMFpHSmtOVFJpTURsak1EY3pNalExTVRoa1lUVXlNamsxWkdJMk1ESTBaalZrWlE9PSJ9.06MJ_eLYYPQmw1ekgn2pBG0JaO-zgc8IYE2vbo7S-Mw"
+
 def MakeMime(fp: any): 
 	ext = fp.name.split(".")[1]
 	enc = b64encode(fp.read()).decode()
 	return f"data:image/{ext};base64,{enc}"
-
 
 def loadImgTob64():
     print("]![ Loading image")
@@ -60,6 +61,7 @@ def loadImgTob64():
 
 def updateAVATAR():
     """ TESTED: Success code returned. """
+    
     return post(update, json={
         "img": loadImgTob64(), 
         "token": TOKEN
@@ -82,11 +84,11 @@ def addUser(data: dict) -> dict:
 
 def loginU():
     """ TESTED: Success user returned. """
-    return post(login, json={"Email": "Guko@example.com", "Password": "PASSWORD1234."}).json()
+    return post(login, json={"T": TOKEN}).json()
 
 
 def  main():
-    res = updateAVATAR()
+    res = loginU()
     print(res)
 
 if __name__ == "__main__": main()

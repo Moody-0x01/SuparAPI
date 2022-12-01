@@ -57,15 +57,19 @@ func login(c *gin.Context) {
 	
 	var resp Response
 
+
+
 	if len(LoginForm.Token) > 0 {
+		fmt.Println("Token auth")
 		resp = AuthenticateUserJWT(LoginForm.Token)
 	} else {
 		if len(LoginForm.Password) > 0 && len(LoginForm.Email) > 0 {
-			User, err := AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
+			user, err := AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
 			
 			if err.Ok {
-				resp = MakeServerResponse(200, User)
+				resp = MakeServerResponse(200, user)
 			} else {
+
 				resp = MakeServerResponse(500, err.Text)
 				fmt.Println("", resp.Data)
 			}
@@ -75,6 +79,7 @@ func login(c *gin.Context) {
 		}
 	}
 
+	// fmt.Println(resp)
 	c.JSON(http.StatusOK, resp);
 }
 
@@ -201,7 +206,7 @@ func NewPost(c *gin.Context) {
 			c.JSON(http.StatusOK, MakeServerResponse(200, "success, added."))
 			return
 		}
-		
+
 		c.JSON(http.StatusOK, MakeServerResponse(500, "the user was not added. problem in db."))
 		return
 	}

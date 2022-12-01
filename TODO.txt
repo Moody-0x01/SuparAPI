@@ -24,3 +24,7 @@ TODO for the go api:
 	[*] [7] GetUserByAccessToken :)
 
 	YEA I DONE EVERYTHING.. I need a new todo.
+
+
+IDEAS:
+	

@@ -86,6 +86,7 @@ type UserLogin struct {
 	Token 	 string `json:"T"`
 }
 
+
 type Response struct {
 	Code int `json:"code"`
  	Data interface{} `json:"data"`
@@ -117,7 +118,7 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case UserLogin:
 			Resp.Data = data.(UserLogin)
 			break
-			
+
 		default:
 			Resp.Data = data.(string)
 			break

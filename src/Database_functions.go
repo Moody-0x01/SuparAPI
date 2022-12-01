@@ -46,7 +46,7 @@ func GetAllPosts() []Post {
 		Posts = append(Posts, temp);
 	}
 
-	fmt.Println(Posts);
+	// fmt.Println(Posts);
 	return Posts
 }
 
@@ -149,7 +149,7 @@ func getUserById(id string) User {
 }
 
 func getUserByToken(Token string) (User, error) {
-	var User User
+	var user User
 
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
@@ -157,14 +157,22 @@ func getUserByToken(Token string) (User, error) {
 
 	if err != nil {
 		fmt.Println(err)
-		return User, err
+		return user, err
 	}
+	
+	fmt.Println("Hi Getting user by ", Token)
 
 	for row.Next() {
-		row.Scan(&User.Id_, &User.UserName, &User.Img, &User.Bg, &User.Bio, &User.Address)
+		row.Scan(&user.Id_, &user.UserName, &user.Img, &user.Bg, &user.Bio, &user.Address)
+		// fmt.Println("Id_: ", user.Id_)
+		// fmt.Println("UserName: ", user.UserName)
+		// fmt.Println("Img: ", user.Img)
+		// fmt.Println("Bg: ", user.Bg)
+		// fmt.Println("Bio: ", user.Bio)
+		// fmt.Println("Address: ", user.Address)
 	}
 
-	return User, nil
+	return user, nil
 }
 
 func getUsers() []User {
