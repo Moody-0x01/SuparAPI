@@ -1,6 +1,7 @@
 """
 This python script is a unit testing entity, I use it to test routes and make sure that everything works as expected.
 ROUTE:
+    
     router.POST("/login", login) expects => {
         "Email": v, 
         "Password": v
@@ -28,13 +29,13 @@ ROUTE:
         "Password": v,
         "UserName": v
     }
-
-	// Get routes.
+	
+    // Get routes.
     router.GET("/getUserPosts", getUserPostsRoute) expects => "/getUserPosts?id_={:UUID}"
-	router.GET("/GetAllPosts", GetAllPostsRoute) expects none, returns all posts.
-	router.GET("/query", getUsersRoute) expects "/query?q{search_query_as string.}"
-	router.GET("/:uuid", getUserByIdRoute) expects /UserID returns user object.
-
+    router.GET("/GetAllPosts", GetAllPostsRoute) expects none, returns all posts.
+    router.GET("/query", getUsersRoute) expects "/query?q{search_query_as string.}"
+    router.GET("/:uuid", getUserByIdRoute) expects /UserID returns user object.
+    
 """
 
 from requests import post
@@ -84,18 +85,10 @@ def addUser(data: dict) -> dict:
 
 def loginU():
     """ TESTED: Success user returned. """
-    return post(login, json={"T": TOKEN}).json()
-
+    return post(login, json={"T": GUKU_TOKEN}).json()
 
 def  main():
     res = loginU()
     print(res)
 
 if __name__ == "__main__": main()
-
-
-
-
-
-
-

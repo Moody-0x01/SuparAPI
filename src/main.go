@@ -14,10 +14,26 @@ var (
 	port string = ":8888"
 )
 
+
+
+func RequestCancelRecover() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Println("client cancel the request")
+				c.Request.Context().Done()
+			}
+		}()
+		c.Next()
+	}
+}
+
+
 func run() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(cors.Default())	
+	router.Use(gin.Logger(), RequestCancelRecover())
 	// POST routes.
 	router.POST("/login", login)
 	router.POST("update", update)

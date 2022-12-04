@@ -1,32 +1,13 @@
 package main;
 
-import "fmt"
-
-func db() {
-	fmt.Println("Hi thhis is db!");
-}
-
-// TODO verifyUserPassword, AddUser, MakePost.
-
-func print(s string) {
-	fmt.Println(s);
-}
-
+import (
+	"fmt"
+//	"strconv"
+)
 
 /*-------------------------------------------------------------------------------------------------------------------------------
  	POSTS
 -------------------------------------------------------------------------------------------------------------------------------*/
-
-
-// func verifyUserPassword(LoginObject UserLogin) (User, bool) {
-// 	// TODO	
-// }
-
-
-// func MakePost(post Post) bool {
-// 	//TODO
-// }
-
 func GetAllPosts() []Post {
 	var Posts []Post
 
@@ -43,15 +24,15 @@ func GetAllPosts() []Post {
 
 	for row.Next() {
 		row.Scan(&temp.Uid_,&temp.Text, &temp.Img)
-		temp.user = getUserById(temp.Uid_)
+		temp.User_ = getUserById(temp.Uid_)
 		Posts = append(Posts, temp)
 	}
-
+	
 	// fmt.Println(Posts)
 	return Posts
 }
 
-func getUserPostById(id string) []Post {
+func getUserPostById(id int) []Post {
 	// A functions to use 
 	var Posts []Post
 
@@ -77,64 +58,66 @@ func getUserPostById(id string) []Post {
 
 
 func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
-	
-	var user User
+	var EmptyUser User
 
-	// row, err := dataBase.Query("SELECT ID, EMAIL, PASSWORDHASH, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
-	row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
-	
-	defer row.Close()
+	if CheckUser(Email) {
 
-	if err != nil {
-		fmt.Println(err)
-		return user, MakeServerError(false, "Could not get user from db. 82")
-	}
-
-	var pwdHash string
-
-	for row.Next() {
-		row.Scan(&pwdHash)
-	}
-	
-	if sha256_(Pwd) == pwdHash {
-		//TODO Get user.
-		//TODO Return user.
-		row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
-
+		var user User
+		row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
+		
 		defer row.Close()
 
 		if err != nil {
-			return user, MakeServerError(false, "Could not get user from db. 97")
+			fmt.Println(err)
+			return user, MakeServerError(false, "Could not get user from db. 82")
 		}
+
+		var pwdHash string
 
 		for row.Next() {
-			row.Scan(&user.Id_, &user.Email, &user.UserName, &user.Token, &user.Img, &user.Bg,  &user.Bio, &user.Address)
+			row.Scan(&pwdHash)
 		}
+		
+		if sha256_(Pwd) == pwdHash {
+			row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 
-		JWT, err := StoreTokenInJWT(user.Token)
+			defer row.Close()
 
-		if err == nil {
-			user.Token = JWT
-			return user, MakeServerError(true, "User created! you can login now..")
+			if err != nil {
+				return user, MakeServerError(false, "Could not get user from db. 97")
+			}
+
+			for row.Next() {
+				row.Scan(&user.Id_, &user.Email, &user.UserName, &user.Token, &user.Img, &user.Bg,  &user.Bio, &user.Address)
+			}
+
+			JWT, err := StoreTokenInJWT(user.Token)
+
+			if err == nil {
+				user.Token = JWT
+				return user, MakeServerError(true, "User created! you can login now..")
+			}
+
+
+			return EmptyUser, MakeServerError(false, "Server had a problem encoding the token..")
 		}
-
-		var EmptyUser User
-		return EmptyUser, MakeServerError(false, "Server had a problem encoding the token..")
-
+		
+		return user, MakeServerError(false, "incorrect password. try again")
 	}
-	
-	return user, MakeServerError(false, "incorrect password. try again")
+
+	return EmptyUser, MakeServerError(false, "incorrect Email.. check and try again!")
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------
  	USERS
 -------------------------------------------------------------------------------------------------------------------------------*/
-func getUserById(id string) User {
+func getUserById(id int) AUser {
 	
-	var User User
+	var User AUser
 
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
 	defer row.Close()
+	
 	if err != nil {
 		fmt.Println(err)
 		return User
@@ -144,28 +127,24 @@ func getUserById(id string) User {
 		row.Scan(&User.Id_, &User.UserName,&User.Img, &User.Bg, &User.Bio, &User.Address)
 	}
 
-
-
 	return User
 }
 
 func getUserByToken(Token string) (User, error) {
-	var user User
-
+	
+	var User_ User
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
 	defer row.Close()
 
 	if err != nil {
 		fmt.Println(err)
-		return user, err
+		return User_, err
 	}
-	
-	fmt.Println("Hi Getting user by ", Token)
 
 	for row.Next() {
-		row.Scan(&user.Id_, &user.UserName, &user.Img, &user.Bg, &user.Bio, &user.Address)
-		// fmt.Println("Id_: ", user.Id_)
+		row.Scan(&User_.Id_, &User_.UserName, &User_.Img, &User_.Bg, &User_.Bio, &User_.Address)
+		// fmt.Println("Id_: ", User_.Id_)
 		// fmt.Println("UserName: ", user.UserName)
 		// fmt.Println("Img: ", user.Img)
 		// fmt.Println("Bg: ", user.Bg)
@@ -173,11 +152,22 @@ func getUserByToken(Token string) (User, error) {
 		// fmt.Println("Address: ", user.Address)
 	}
 
-	return user, nil
+	return User_, nil
 }
 
-func getUsers() []User {
-	var Users []User
+
+
+func deletePost(PostId int, uId int, Token string) Response {
+	// TODO.
+}
+
+func editPostTextContent() Response {
+	// probably a todo... :)
+}
+
+
+func getUsers() []AUser {
+	var Users []AUser
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 	defer row.Close()
 	if err != nil {
@@ -185,7 +175,7 @@ func getUsers() []User {
 		return Users
 	}
 
-	var temp User
+	var temp AUser
 
 	for row.Next() {
 		
@@ -196,10 +186,8 @@ func getUsers() []User {
 	return Users	
 }
 
-func getUsersByQuery(Q string) []User {
-	// TODO Verify this one works, sqlite to find alike attributes in row.
-	// DONE.
-	var Users []User
+func getUsersByQuery(Q string) []AUser {
+	var Users []AUser
 	var NewQ string = "%" + Q + "%"
 	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
@@ -211,7 +199,7 @@ func getUsersByQuery(Q string) []User {
 	}
 
 	for row.Next() {
-		var temp User
+		var temp AUser
 		row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
 		Users = append(Users, temp)	
 	}
@@ -231,20 +219,24 @@ func GetUserByJWToken(JWToken string) (User, bool) {
 }
 
 func GetUserByToken(Token string) User {
-	var User User;
-	
+
+	var User_ User;
 	row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
+
 	defer row.Close()
+
 	if err != nil {
 		fmt.Println(err)
-		return User
+		return User_
 	}
 
 	for row.Next() {
-		row.Scan(&User.Id_, &User.Email, &User.UserName, &User.Img, &User.Bg, &User.Bio, &User.Address)
+		row.Scan(&User_.Id_, &User_.Email, &User_.UserName, &User_.Img, &User_.Bg, &User_.Bio, &User_.Address)
+		fmt.Println("ID: ", User_.Id_)
+		fmt.Println("UName: ", User_.UserName)
 	}
 
-	return User;
+	return User_;
 }
 
 
@@ -276,17 +268,6 @@ func CheckUser(Email string) bool {
 }
 
 func AddUser(user User) Response {
-	
-	/* 
-	- Check if the email associated with the request already exists.
-		if it exists return an error code and a string.
-		else just go on with process
-	- try to add the user by:
-		generating a token and assigning it to the user before adding
-	*/
-
-	
-
 	if !CheckUser(user.Email) {
 
 		var Token string = generateAccessToken(user.Email)
@@ -309,8 +290,6 @@ func AddUser(user User) Response {
 				fmt.Println(err)
 				return MakeServerResponse(500, "The server had a problem making the jwt token.")
 			}
-
-			fmt.Println("JWT: ", JWT)
 
 			FetchedUser.Token = JWT;
 			return MakeServerResponse(200, FetchedUser) // Success.
@@ -384,5 +363,4 @@ func AddPost(Text string, Img string, uuid int) Error {
 // TODO Add comment feeature.
 
 // TODO Add likes feature.
-
 // TODO Add FOLLOW/UNFOLLOW feature.

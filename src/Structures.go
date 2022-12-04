@@ -20,13 +20,22 @@ type User struct {
 }
 
 
+type AUser struct {
+	Id_ 		 int `json:"id_"`
+	UserName 	 string `json:"UserName"`
+	Img 		 string `json:"img"`
+	Bg 			 string `json:"bg"`
+	Bio 		 string `json:"bio"`
+	Address		 string `json:"addr"`
+}
+
 // for fetch posts
 type Post struct {
 	Id_  int 	`json:"id"`
 	Uid_ int 	`json:"uuid"`
 	Text string `json:"text"`
 	Img	 string `json:"img"`
-	user User   `json:"user"` 
+	User_ AUser   `json:"user"` 
 }
 
 
@@ -39,7 +48,7 @@ func (U *User) setDefaults() {
 		Bio 		 string `json:"bio"`
 		Address		 string `json:"addr"`
 	*/
-	
+
 	if isEmpty(U.Img) {
 		U.Img = DefaultUserImg
 	}
@@ -107,6 +116,14 @@ func MakeServerResponse(code int, data interface{}) Response {
 
 		case []User:
 			Resp.Data = data.([]User)
+			break
+
+		case []AUser:
+			Resp.Data = data.([]AUser)
+			break
+
+		case AUser:
+			Resp.Data = data.(AUser)
 			break
 
 		case User:

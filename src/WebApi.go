@@ -4,28 +4,33 @@ import (
 	"net/http"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func GetAllPostsRoute(c *gin.Context) {
 	All := GetAllPosts()
-	
 	var res Response = MakeServerResponse(200, All)
-
 	c.JSON(http.StatusOK, res)
 }
 
+	
+
 func getUserPostsRoute(c *gin.Context) {
 	var id string = GetFieldFromContext(c, "id_")
-	fmt.Println(id)
-	var UserPosts []Post = getUserPostById(id);
-	var res Response = MakeServerResponse(200, UserPosts)
-	c.JSON(http.StatusOK, res)
+	id_, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(500, MakeServerResponse(0, "Server error"))
+		return 
+	}
+
+	var UserPosts []Post = getUserPostById(id_)
+	c.JSON(http.StatusOK, MakeServerResponse(200, UserPosts))
 }
 
 
 func getUsersRoute(c *gin.Context) {
 	var q string = GetFieldFromContext(c, "q")
-	var Users []User;
+	var Users []AUser;
 	
 	if q != "" {
 		Users = getUsersByQuery(q)
@@ -33,15 +38,22 @@ func getUsersRoute(c *gin.Context) {
 		Users = getUsers()
 	}
 	
-	var res Response = MakeServerResponse(200, Users)
-
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, MakeServerResponse(200, Users))
 }
 
 func getUserByIdRoute(c *gin.Context) {
+	
 	var uuid string = c.Param("uuid")
-	var User User = getUserById(uuid)
+	uuid_, err := strconv.Atoi(uuid)
+
+	if err != nil {
+		c.JSON(500, MakeServerResponse(0, "Server error"))
+		return 
+	}
+
+	var User AUser = getUserById(uuid_)
 	var res Response = MakeServerResponse(200, User)
+	
 	c.JSON(http.StatusOK, res)
 }
 
@@ -60,7 +72,6 @@ func login(c *gin.Context) {
 
 
 	if len(LoginForm.Token) > 0 {
-		fmt.Println("Token auth")
 		resp = AuthenticateUserJWT(LoginForm.Token)
 	} else {
 		if len(LoginForm.Password) > 0 && len(LoginForm.Email) > 0 {
@@ -85,21 +96,18 @@ func login(c *gin.Context) {
 
 
 func signUp(c *gin.Context) {
-	var newUser User
 	
+	var newUser User	
 	c.BindJSON(&newUser);
-	
 	if isEmpty(newUser.Email) || isEmpty(newUser.PasswordHash) || isEmpty(newUser.UserName) {
 		c.JSON(http.StatusOK, MakeServerResponse(500, "The server could not get the Email, password or user name. please check your request then try again L86"))
 	} else {
 		newUser.setDefaults();
 		// Hash the password.
 		newUser.PasswordHash = sha256_(newUser.PasswordHash)
-		fmt.Println(newUser.PasswordHash)
 		var Resp Response = AddUser(newUser) // Creates the user and sets the Token.
 		c.JSON(http.StatusOK, Resp)
 	}
-	
 }
 
 /*------------------------------------------------------------------------------------------------------------------------*/
@@ -119,8 +127,8 @@ func update(c *gin.Context) {
 	c.BindJSON(&Data)
 	if len(Data.Token) > 0 {
 		AccessToken, Ok := GetTokenFromJwt(Data.Token)
+		
 		if Ok {
-
 			var Ok bool = true;
 
 			if !isEmpty(Data.Img) {
@@ -143,8 +151,13 @@ func update(c *gin.Context) {
 				Ok = e.Ok
 			}
 
+			if !isEmpty(Data.UserName) {
+				e :=updateUser("USERNAME", Data.UserName, AccessToken)
+				Ok = e.Ok
+			}
+
 			if Ok {
-				c.JSON(http.StatusOK, MakeServerResponse(200, "Updated!"))
+				c.JSON(http.StatusOK, MakeServerResponse(200, "updated!"))
 				return
 			} else {
 				c.JSON(http.StatusOK, MakeServerResponse(500, "Something went wrong.! 143"))

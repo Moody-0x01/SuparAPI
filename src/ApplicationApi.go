@@ -64,11 +64,11 @@ func GetTokenFromJwt(TokenStr string) (string, bool) {
     }
 
     if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-        t, err := b64.StdEncoding.DecodeString(claims["T"].(string))
+        t, _ := claims["T"].(string)
        
-        if err != nil {
-            return "", false
-        }
+        // if err != nil {
+        //     return "", false
+        // }
 
         return string(t), true
 
@@ -84,15 +84,7 @@ func GetFieldFromContext(c *gin.Context, field string) string {
 }
 
 func generateAccessToken(salt string) string {
-    /* 
-        PYTHON bluepring:
-            def TokenGen(self, salt: str):
-                * _IV: list[str] = [chr(randint(0, 255)) for i in range(32)]
-                * _S1 = ''.join(_IV)
-                * _S_FINAL = _S1 + b64encode(salt.encode()).decode()
-                * return sha256(_S_FINAL.encode()).hexdigest()
-    */
-
+  
     rand.Seed(time.Now().UnixNano())
 
     var SaltAsBytes []byte = []byte(salt)
@@ -116,14 +108,15 @@ func AuthenticateUserJWT(UserJWT string) Response {
     Token, Ok := GetTokenFromJwt(UserJWT)
 
     if Ok {
-        user, err := getUserByToken(Token)
+        fmt.Println("", sha256_(Token))
+        User_, err := getUserByToken(Token)
 
         if err != nil {
             // a db error.
             return MakeServerResponse(500, "Db Error. (line 108).")
         } else {
             // Returns the user if everything was alright.
-            return MakeServerResponse(200, user)
+            return MakeServerResponse(200, User_)
         }
 
     } else {
