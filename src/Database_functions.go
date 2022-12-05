@@ -8,6 +8,26 @@ import (
 /*-------------------------------------------------------------------------------------------------------------------------------
  	POSTS
 -------------------------------------------------------------------------------------------------------------------------------*/
+
+func DeleteUserPost(PostId int, uuid int, Token string) Response {
+	FetchedUser, err := getUserByToken(Token);
+	var ownerId int = getPostOwnerId(PostId);
+
+	if err != nil { return MakeServerResponse(500, "db error, could not fetch user by token.") }
+	if uuid != FetchedUser.Id_ { return MakeServerResponse(401, "Not authorized!") }
+	if uuid != ownerId { return MakeServerResponse(401, "Not authorized!") }
+
+	stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
+	_, err := stmt.Exec(PostId)
+	
+	if err != nil {
+		return MakeServerResponse(500, "Could not delete the post.")
+	}
+
+	return MakeServerResponse(200, "success")
+}
+
+
 func GetAllPosts() []Post {
 	var Posts []Post
 
@@ -32,10 +52,25 @@ func GetAllPosts() []Post {
 	return Posts
 }
 
+func getPostOwnerId(PostID int) int {
+	var id int
+	row, err := dataBase.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
+	defer row.Close()
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	for row.Next() {
+		row.Scan(&id);
+	}
+	return id
+}
+
+
+
 func getUserPostById(id int) []Post {
 	// A functions to use 
 	var Posts []Post
-
 	row, err := dataBase.Query("SELECT Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
@@ -155,11 +190,6 @@ func getUserByToken(Token string) (User, error) {
 	return User_, nil
 }
 
-
-
-func deletePost(PostId int, uId int, Token string) Response {
-	// TODO.
-}
 
 func editPostTextContent() Response {
 	// probably a todo... :)

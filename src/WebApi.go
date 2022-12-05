@@ -58,10 +58,7 @@ func getUserByIdRoute(c *gin.Context) {
 }
 
 /* AUTHENTICATION AND OPERATIONS */
-/*
-Implemented: Login, Sign Up.
-Not implemented: data access (Update, add, delete)
-*/
+
 func login(c *gin.Context) {
 	var LoginForm UserLogin;
 	
@@ -226,3 +223,56 @@ func NewPost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, MakeServerResponse(500, "invalid access token. try with a valid token."))
 }
+
+func DeletePost(c *gin.Context) {
+	/*
+	expecting: 
+		Json {
+			"id_"
+			"token"
+			"uuid"
+		}
+	*/
+
+	var post TokenizedPost
+	c.BindJSON(&post)
+	// - PostID
+	// - Token
+	// - Uuid
+
+	if isEmpty(post.Token) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "A token is required {token: v}"))
+		return
+	}
+
+	if isEmpty(post.Uuid) || isEmpty(post.PostID) {
+		c.JSON(http.StatusOK, MakeServerResponse(500, "a required argument is messing, check the uuid and id_"))
+		return
+	}
+
+	token, Ok := GetTokenFromJwt(post.Token)
+	var resp Response
+	
+	if Ok {
+		resp = DeleteUserPost(post.PostID, post.Uuid, token)
+		c.JSON(http.StatusOK, resp)
+		return
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(500, "invalid access token. try with a valid token."))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

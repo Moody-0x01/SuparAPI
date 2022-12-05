@@ -81,10 +81,12 @@ type Query struct {
 	Query_ int `json:"query"`
 }
 
-// for securly adding posts.
+// for securly adding or edit a posts.
 type TokenizedPost struct {
+	PostID int `json:"id_"`
 	Token string `json:"token"`
 	Uuid  int `json:"uuid"`
+	
 	Text  string `json:"text"`
 	Img   string `json:"img"`
 }
