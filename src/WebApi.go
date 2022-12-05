@@ -226,12 +226,15 @@ func NewPost(c *gin.Context) {
 
 func DeletePost(c *gin.Context) {
 	/*
+	
 	expecting: 
 		Json {
 			"id_"
 			"token"
 			"uuid"
 		}
+
+
 	*/
 
 	var post TokenizedPost
@@ -245,7 +248,7 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	if isEmpty(post.Uuid) || isEmpty(post.PostID) {
+	if post.Uuid == 0  || post.PostID == 0 {
 		c.JSON(http.StatusOK, MakeServerResponse(500, "a required argument is messing, check the uuid and id_"))
 		return
 	}

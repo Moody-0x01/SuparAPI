@@ -10,28 +10,40 @@ import (
 -------------------------------------------------------------------------------------------------------------------------------*/
 
 func DeleteUserPost(PostId int, uuid int, Token string) Response {
+
 	FetchedUser, err := getUserByToken(Token);
-	var ownerId int = getPostOwnerId(PostId);
-
-	if err != nil { return MakeServerResponse(500, "db error, could not fetch user by token.") }
-	if uuid != FetchedUser.Id_ { return MakeServerResponse(401, "Not authorized!") }
-	if uuid != ownerId { return MakeServerResponse(401, "Not authorized!") }
-
-	stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
-	_, err := stmt.Exec(PostId)
 	
-	if err != nil {
-		return MakeServerResponse(500, "Could not delete the post.")
+	ownerId, ok := getPostOwnerId(PostId);
+
+	if ok {
+
+		if uuid != ownerId { return MakeServerResponse(401, "Not authorized!") }
+		if err != nil { return MakeServerResponse(500, "db error, could not fetch user by token.") }
+		if uuid != FetchedUser.Id_ { return MakeServerResponse(401, "Not authorized!") }
+
+		stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
+
+		result, err := stmt.Exec(PostId) // Execute query.
+
+
+		if err != nil {
+			return MakeServerResponse(500, "Could not delete the post.")
+		}
+
+		fmt.Println("", result);
+
+		return MakeServerResponse(200, "success")
 	}
 
-	return MakeServerResponse(200, "success")
+	return MakeServerResponse(401, "Not authorized!")
+	
 }
 
 
 func GetAllPosts() []Post {
 	var Posts []Post
 
-	row, err := dataBase.Query("SELECT USER_ID, Text, IMG FROM POSTS ORDER BY ID DESC")
+	row, err := dataBase.Query("SELECT ID, USER_ID, Text, IMG FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
 
@@ -43,7 +55,7 @@ func GetAllPosts() []Post {
 	var temp Post
 
 	for row.Next() {
-		row.Scan(&temp.Uid_,&temp.Text, &temp.Img)
+		row.Scan(&temp.Id_, &temp.Uid_,&temp.Text, &temp.Img)
 		temp.User_ = getUserById(temp.Uid_)
 		Posts = append(Posts, temp)
 	}
@@ -52,18 +64,20 @@ func GetAllPosts() []Post {
 	return Posts
 }
 
-func getPostOwnerId(PostID int) int {
+func getPostOwnerId(PostID int) (int, bool) {
 	var id int
 	row, err := dataBase.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
 	defer row.Close()
+	
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return 0, false
 	}
+
 	for row.Next() {
 		row.Scan(&id);
 	}
-	return id
+	return id, true
 }
 
 
@@ -71,7 +85,7 @@ func getPostOwnerId(PostID int) int {
 func getUserPostById(id int) []Post {
 	// A functions to use 
 	var Posts []Post
-	row, err := dataBase.Query("SELECT Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
+	row, err := dataBase.Query("SELECT ID, Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
 
@@ -83,7 +97,7 @@ func getUserPostById(id int) []Post {
 	var temp Post
 
 	for row.Next() {
-		row.Scan(&temp.Text, &temp.Img);
+		row.Scan(&temp.Id_, &temp.Text, &temp.Img);
 		Posts = append(Posts, temp);
 	}
 
@@ -179,20 +193,9 @@ func getUserByToken(Token string) (User, error) {
 
 	for row.Next() {
 		row.Scan(&User_.Id_, &User_.UserName, &User_.Img, &User_.Bg, &User_.Bio, &User_.Address)
-		// fmt.Println("Id_: ", User_.Id_)
-		// fmt.Println("UserName: ", user.UserName)
-		// fmt.Println("Img: ", user.Img)
-		// fmt.Println("Bg: ", user.Bg)
-		// fmt.Println("Bio: ", user.Bio)
-		// fmt.Println("Address: ", user.Address)
 	}
 
 	return User_, nil
-}
-
-
-func editPostTextContent() Response {
-	// probably a todo... :)
 }
 
 
