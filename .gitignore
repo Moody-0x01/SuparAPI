@@ -11,3 +11,6 @@ db
 build
 *.exe
 
+# Commit tracker
+autoPush.py 
+autoConf.json
