@@ -2,8 +2,24 @@ package main;
 
 import (
 	"fmt"
-//	"strconv"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 )
+
+var dataBase *sql.DB
+
+// db initializer: Opens the db, then evluates a global conn variable.
+
+func initializeDb() (e error) {
+	var err error
+
+	dataBase, err = sql.Open("sqlite3", "./db/Users.db?cache=shared&mode=rwc"); if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 /*-------------------------------------------------------------------------------------------------------------------------------
  	POSTS

@@ -1,9 +1,7 @@
 
 
 # Go Api
-
 ### Routes
-
 NOTE: This section will be updated regularily once I add or remove a route.
 
 - `/login` Login, can get a token or (password, Email) and if everything is valid it returns user info + Token.
@@ -14,6 +12,7 @@ NOTE: This section will be updated regularily once I add or remove a route.
 - `/signup` making an account. then returning the token to update, delete, add and other operation regarding ur account.
 - `/update` expects either a img, bio, addr or bg to be updated in the database, but also accepts a token that will be given if authenticated. if the token is not provided, the server will return error code 500.
 - `/NewPost` add new post with token, expects a token, img, uuid, and post text. if something is not set properly it will return a response report about the error.
+- `/DeletePost` deleting user post using userid, postid and jwt.
 
 ### Database (Tables and schema.)
 
@@ -58,7 +57,14 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
 - `src\Db_setup.go` Initializes the database global connection. if there is an error connecting to the db, the api would not work.
 
 
+### CDN
 
+- I have recently added a cdn to be connected to once the api has images and other file to save and retrieve
+Here is the [link](https://github.com/Moody0101-X/Zimg_cdn)
+
+### front-end app.
+
+- to see the front-end app that is using this api go [Here](https://github.com/Moody0101-X/SM_app)
 
 
 

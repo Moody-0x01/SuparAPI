@@ -53,20 +53,19 @@ func run() {
 	router.GET("/query", getUsersRoute) // user look up by name
 	router.GET("/:uuid", getUserByIdRoute) // get user by id
 	
-	fmt.Println("Serving in port", port) 
-	
+	// running the server.
+	fmt.Println("Serving in port", port) 	
 	router.Run(port)
 }
 
 func main() {
-
 	err := initializeDb();
-
+	
 	if err != nil {
         fmt.Println("Error opening the database! ", err.Error())
         return
     }
-	
+
 	run()
 }
 
