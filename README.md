@@ -60,15 +60,17 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
 - I have recently added a cdn to be connected to once the api has images and other file to save and retrieve
 Here is the [link](https://github.com/Moody0101-X/Zimg_cdn)
 #### CDN connection
-    
-    - Go Constant endpoints
-    ```go
-        // server running in port 8500 so 8888 -> 8500?
-        const api string = "http://localhost:8500"
-        const addIMG string = api + "/Zimg/addAvatar"
-        const addBG string = api + "/Zimg/addbg"
-        const addPOST string = api + "/Zimg/NewPostImg"
-    ```
+
+```go
+
+// Go Constant endpoints
+// server running in port 8500 so 8888 -> 8500?
+const api string = "http://localhost:8500"
+const addIMG string = api + "/Zimg/addAvatar"
+const addBG string = api + "/Zimg/addbg"
+const addPOST string = api + "/Zimg/NewPostImg"
+
+```
     - `/Zimg/addAvatar` adding user avatar.
     - `/Zimg/addbg` adding user background.
     - `/Zimg/NewPostImg` adding user post assets. (Now only images. video will be added.)
