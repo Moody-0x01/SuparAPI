@@ -15,8 +15,6 @@ const api string = "http://localhost:8500"
 const addIMG string = api + "/Zimg/addAvatar"
 const addBG string = api + "/Zimg/addbg"
 const addPOST string = api + "/Zimg/NewPostImg"
-// const DefaultUserImg string = "/img/defUser.jpg"
-// const DefaultUserBg string = "/img/defBg.jpg"
 
 func addAvatar_ToCDN(uuid int, Mime string) (bool, string) {
 
@@ -41,12 +39,11 @@ func addAvatar_ToCDN(uuid int, Mime string) (bool, string) {
 
     json.NewDecoder(resp.Body).Decode(&res)
     
-    if res["code"].(int) == 200 {
-        return true, res["data"].(map[string]string)["url"]
+    if int(res["code"].(float64)) == 200 {
+        return true, res["data"].(map[string]interface{})["url"].(string)
     }
-    
+
     return false, res["data"].(string)
-    
 }
 
 func addbackground_ToCDN(uuid int , Mime string) (bool, string) {
@@ -72,8 +69,8 @@ func addbackground_ToCDN(uuid int , Mime string) (bool, string) {
 
     json.NewDecoder(resp.Body).Decode(&res)
     
-    if res["code"].(int) == 200 {
-    	return true, res["data"].(map[string]string)["url"]
+    if int(res["code"].(float64)) == 200 {
+    	return true, res["data"].(map[string]interface{})["url"].(string)
     } 
     
     return false, res["data"].(string)
@@ -100,8 +97,8 @@ func addPostImg_ToCDN(uuid int, Mime string, pid int) (bool, string) {
 
     json.NewDecoder(resp.Body).Decode(&res)
     
-    if res["code"].(int) == 200 {
-    	return true, res["data"].(map[string]string)["url"]
+    if int(res["code"].(float64)) == 200 {
+    	return true, res["data"].(map[string]interface{})["url"].(string)
     }
     
     return false, res["data"].(string)

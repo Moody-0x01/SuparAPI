@@ -416,16 +416,13 @@ func updateUser(field string, newValue string, Token string) Error {
 	
 
 	switch field {
-		// TODO adding to cdn before updating in the db.
-
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
-			uuid, ok := getuuidByToken(Token)
-			
-			if ok {
-				ok, newValue = addAvatar_ToCDN(uuid, newValue)
-				fmt.Println("ok: ", ok)
+			uuid, OK := getuuidByToken(Token)
+			if OK {
+				OK, newValue = addAvatar_ToCDN(uuid, newValue)
 				fmt.Println("path: ", newValue)
+				ok = OK
 			}
 
 			break		
@@ -439,13 +436,12 @@ func updateUser(field string, newValue string, Token string) Error {
 			break		
 		case "BG":
 			Query = "UPDATE USERS SET BG=? WHERE TOKEN=?"
-			uuid, ok := getuuidByToken(Token)
+			uuid, OK := getuuidByToken(Token)
 			
-			if ok {
-				ok, newValue := addbackground_ToCDN(uuid, newValue)
-				
-				fmt.Println("ok: ", ok)
+			if OK {				
+				OK, newValue := addbackground_ToCDN(uuid, newValue)
 				fmt.Println("path: ", newValue)
+				ok = OK
 			}
 
 			break
@@ -466,8 +462,9 @@ func updateUser(field string, newValue string, Token string) Error {
 		_, err := stmt.Exec(newValue, Token)
 
 		if err != nil {
+			fmt.Println("db err: ", err)
 			return MakeServerError(false, "db err, could not update.")
-		}	
+		}
 
 		return MakeServerError(true, "success!")
 	}
