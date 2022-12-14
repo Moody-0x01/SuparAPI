@@ -46,21 +46,33 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
 ### Files and folders
 
 - `src` The folder that holds my whole project.
-- `src\structures.go` the file that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
-- `src\main.go` The program entry point, it run the server.
-- `src\WebApi.go` contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
-- `src\ApplicationApi.go` contains utility functions to do this ops:
+- [`src\Structures.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/Structures.go) the file that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
+- [`src\main.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/main.go) The program entry point, it run the server.
+- [`src\routes.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/routes.go) contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
+- [`src\cryptography.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/cryptography.go) contains utility functions for crypto operations like:
     1. Decode/Encode JWT.
     2. Hash passwords
     3. generate secret token for users.
-- `src\Database_functions` contains database functionality, given a global *sql.db* object to perform sqlite query.
-- `src\Db_setup.go` Initializes the database global connection. if there is an error connecting to the db, the api would not work.
-
+- [`src\database.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/database.go) contains database functionality, given a global *sql.db* object to perform sqlite query.
 
 ### CDN
 
 - I have recently added a cdn to be connected to once the api has images and other file to save and retrieve
 Here is the [link](https://github.com/Moody0101-X/Zimg_cdn)
+#### CDN connection
+    
+    - Go Constant endpoints
+    ```go
+        // server running in port 8500 so 8888 -> 8500?
+        const api string = "http://localhost:8500"
+        const addIMG string = api + "/Zimg/addAvatar"
+        const addBG string = api + "/Zimg/addbg"
+        const addPOST string = api + "/Zimg/NewPostImg"
+    ```
+    - `/Zimg/addAvatar` adding user avatar.
+    - `/Zimg/addbg` adding user background.
+    - `/Zimg/NewPostImg` adding user post assets. (Now only images. video will be added.)
+    - To see implementation [cdn.go](https://github.com/Moody0101-X/Go_Api/blob/main/src/cdn.go)
 
 ### front-end app.
 
