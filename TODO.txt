@@ -23,9 +23,11 @@ TODO for the go api:
 			the json format that will be posted to the cdn will be like this:
 				bg: <img base64>
 				img: <img base64>
-	[] [11] -> integrate the cdn into the server ops, including updating images, posting...
+	[*] [11] -> integrate the cdn into the server ops, including updating images, posting...
 		[*] -> signup
-		[] -> Update()
+		[*] -> addPostImg.
+		[*] -> Update()
+		(Not tested yet!)
 	[] [12] -> create mechanism to add likes, comments to post.
 
 		the idea would be like this:

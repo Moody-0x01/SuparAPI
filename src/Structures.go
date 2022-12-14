@@ -1,10 +1,10 @@
 package main
 
 // Default fields for the user object.
-var DefaultUserImg string = "/img/defUser.jpg"
-var DefaultUserBg string = "/img/defBg.jpg"
-var DefaultUserBio string = "Wait for it to load :)"
-var DefaultUserAddress string = "Everywhere"
+const DefaultUserImg string = "/img/defUser.jpg"
+const DefaultUserBg string = "/img/defBg.jpg"
+const DefaultUserBio string = "Wait for it to load :)"
+const DefaultUserAddress string = "Everywhere"
 
 
 type User struct {

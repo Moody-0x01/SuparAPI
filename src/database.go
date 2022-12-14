@@ -316,7 +316,7 @@ func CheckUser(Email string) bool {
 	}
 }
 
-func getuuid(Table string) int {
+func GetNextUID(Table string) int {
 
 	var id int;
 	row, err := dataBase.Query("select MAX(ID) from " + Table);
@@ -344,7 +344,7 @@ func AddUser(user User) Response {
 		
 
 		/*------------Add To cdn-------------*/
-		var uuid = getuuid("Users")
+		var uuid = GetNextUID("Users")
 
 		ok, img := addAvatar_ToCDN(uuid, user.Img)
 		
@@ -390,35 +390,71 @@ func AddUser(user User) Response {
 	return MakeServerResponse(500, "This user already exists..")
 }
 
+func getuuidByToken(Token string) (int, bool) {
+	
+	var uuid int
+	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
+	
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return 0, false
+	}
+
+	for row.Next() {
+		row.Scan(&uuid);
+	}
+
+	return uuid, true
+}
 
 func updateUser(field string, newValue string, Token string) Error {
 	
 	var ok bool;
 	var Query string
+	
 
 	switch field {
 		// TODO adding to cdn before updating in the db.
-		
+
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
-			ok = true
+			uuid, ok := getuuidByToken(Token)
+			
+			if ok {
+				ok, newValue = addAvatar_ToCDN(uuid, newValue)
+				fmt.Println("ok: ", ok)
+				fmt.Println("path: ", newValue)
+			}
+
 			break		
 		case "BIO":
 			Query = "UPDATE USERS SET BIO=? WHERE TOKEN=?"
-			ok = true
-			break	
+			break
+
 		case "ADDR":
 			Query = "UPDATE USERS SET ADDR=? WHERE TOKEN=?"
 			ok = true
 			break		
 		case "BG":
 			Query = "UPDATE USERS SET BG=? WHERE TOKEN=?"
-			ok = true
+			uuid, ok := getuuidByToken(Token)
+			
+			if ok {
+				ok, newValue := addbackground_ToCDN(uuid, newValue)
+				
+				fmt.Println("ok: ", ok)
+				fmt.Println("path: ", newValue)
+			}
+
 			break
+		
 		case "USERNAME":
 			Query = "UPDATE USERS SET USERNAME=? WHERE TOKEN=?"
 			ok = true
 			break
+
 		default:
 			ok = false
 			break
@@ -436,17 +472,30 @@ func updateUser(field string, newValue string, Token string) Error {
 		return MakeServerError(true, "success!")
 	}
 
-	return MakeServerError(false, "Unexpected field name.")
+	return MakeServerError(false, "Unexpected field name, or could not find user by token..")
 }
 
 
 func AddPost(Text string, Img string, uuid int) Error {
 
+	if !isEmpty(Img) {
+		var pid int = GetNextUID("Posts")
+		
+		var ok bool;
+		
+		ok, Img = addPostImg_ToCDN(uuid, Img, pid) // (bool, string)
+	
+		if !ok {
+			return MakeServerError(false, "could not add post img to cdn.. err L480")
+		}
+
+	}
+
 	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG) VALUES(?, ?, ?)")
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil {
-		return MakeServerError(false, "could not add post. err L334")
+		return MakeServerError(false, "could not add post. err L489")
 	}
 
 	return MakeServerError(true, "success!")

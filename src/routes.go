@@ -143,12 +143,12 @@ func update(c *gin.Context) {
 			}
 
 			if !isEmpty(Data.Bg) {
-				e :=updateUser("BG", Data.Bg, AccessToken)
+				e := updateUser("BG", Data.Bg, AccessToken)
 				Ok = e.Ok
 			}
 
 			if !isEmpty(Data.UserName) {
-				e :=updateUser("USERNAME", Data.UserName, AccessToken)
+				e := updateUser("USERNAME", Data.UserName, AccessToken)
 				Ok = e.Ok
 			}
 
@@ -232,7 +232,6 @@ func DeletePost(c *gin.Context) {
 			"token"
 			"uuid"
 		}
-
 
 	*/
 
