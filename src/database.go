@@ -316,12 +316,53 @@ func CheckUser(Email string) bool {
 	}
 }
 
+func getuuid(Table string) int {
+
+	var id int;
+	row, err := dataBase.Query("select MAX(ID) from " + Table);
+	
+	defer row.Close()
+
+	if err != nil { return 0 }
+	
+	for row.Next() {
+		row.Scan(&id);
+	}
+
+	return id + 1;
+}
+
+
+func addToCdn(img string, bg string) Response {
+	return MakeServerResponse(200, "Not implemented!");
+}
+
 func AddUser(user User) Response {
 	if !CheckUser(user.Email) {
 
 		var Token string = generateAccessToken(user.Email)
+		
+
+		/*------------Add To cdn-------------*/
+		var uuid = getuuid("Users")
+
+		ok, img := addAvatar_ToCDN(uuid, user.Img)
+		
+		if !ok {
+			return MakeServerResponse(500, "cdn error, could not add avatar.")
+		}
+
+		ok, bg := addbackground_ToCDN(uuid, user.Bg)
+
+		if !ok {
+			return MakeServerResponse(500, "cdn error, could not add background.")
+		}
+
+
+		/*------------Add To cdn-------------*/
+
 		stmt, _ := dataBase.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
-		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, user.Img, user.Bio, user.Bg, user.Address)
+		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, img, user.Bio, bg, user.Address)
 		
 		if err != nil {
 			return MakeServerResponse(500, "Could not add to db.")
@@ -356,6 +397,8 @@ func updateUser(field string, newValue string, Token string) Error {
 	var Query string
 
 	switch field {
+		// TODO adding to cdn before updating in the db.
+		
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
 			ok = true

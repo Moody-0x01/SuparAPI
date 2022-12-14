@@ -12,7 +12,7 @@ TODO for the go api:
 	[*] [8] -> "/getUserPosts"
 	[*] [9] -> "/<user_id>"
 	
-	[] [10] -> create python cdn api to store Images/Videos.. (Zimg)
+	[*] [10] -> create python cdn api to store Images/Videos.. (Zimg)
 
 		The idea would be like this: 
 			if the user was added with success we will send the images to the cdn and will be organized this way:
@@ -23,14 +23,16 @@ TODO for the go api:
 			the json format that will be posted to the cdn will be like this:
 				bg: <img base64>
 				img: <img base64>
-
-	[] [11] -> create mechanism to add likes, comments to post.
+	[] [11] -> integrate the cdn into the server ops, including updating images, posting...
+		[*] -> signup
+		[] -> Update()
+	[] [12] -> create mechanism to add likes, comments to post.
 
 		the idea would be like this:
 			if a user liked a certain post we will add 1 to the like_count in the post row. then get who liked it and add their id to the liked text which is like this: id1|id2|id3.... and if someone wants to see who liked the post we will return array of ids then scrap the user with /<user_id> route.
 			note: submitting a liked flag with a string will be prohibited so it is not going to break or anything.
 
-	[] [12] -> add comments (I have no idea how to do this now!)
+	[] [13] -> add comments (I have no idea how to do this now!)
 
 
 	- APPLICATION LAYER API -

@@ -12,7 +12,6 @@ func GetAllPostsRoute(c *gin.Context) {
 	var res Response = MakeServerResponse(200, All)
 	c.JSON(http.StatusOK, res)
 }
-
 	
 
 func getUserPostsRoute(c *gin.Context) {
