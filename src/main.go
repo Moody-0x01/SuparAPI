@@ -48,6 +48,7 @@ func run() {
 	router.POST("/signup", signUp) // Making new account
 	router.POST("/comment", addCommentRoute) // For likes
 	router.POST("/like", addLikeRoute) // For comments
+	router.POST("/like/remove", RemoveLikeRoute)
 	
 	// Get routes.
 	router.GET("/getUserPosts", getUserPostsRoute) // gettting user post by id

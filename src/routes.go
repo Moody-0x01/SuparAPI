@@ -265,11 +265,12 @@ func DeletePost(c *gin.Context) {
 
 
 func getPostComments(c *gin.Context) {
-	var post_id string = c.Param("pid")
-	pid_, err := strconv.Atoi(post_id)
+	var pid string = c.Param("pid")
+	
+	pid_, err := strconv.Atoi(pid)
 
 	if err != nil {
-		c.JSON(http.StatusOK, MakeServerResponse(0, "make sure post_id is an integer"))
+		c.JSON(http.StatusOK, MakeServerResponse(400, "bad request, make sure post_id is an integer"))
 		return 
 	}
 	
@@ -279,11 +280,12 @@ func getPostComments(c *gin.Context) {
 }
 
 func getPostLikes(c *gin.Context) {
-	var post_id string = c.Param("pid")
-	pid_, err := strconv.Atoi(post_id)
+	var pid string = c.Param("pid")
+	
+	pid_, err := strconv.Atoi(pid)
 
 	if err != nil {
-		c.JSON(http.StatusOK, MakeServerResponse(0, "make sure post_id is an integer"))
+		c.JSON(http.StatusOK, MakeServerResponse(400, "bad request, make sure post_id is an integer"))
 		return 
 	}
 	
@@ -318,7 +320,7 @@ func addCommentRoute(c *gin.Context) {
 	var CommentRoutePostedData TokenizedComment
 	c.BindJSON(&CommentRoutePostedData)
 
-	if isEmpty(CommentRoutePostedData.Token) || isEmpty(CommentRoutePostedData.Uuid) ||  isEmpty(CommentRoutePostedData.Post_id) || isEmpty(CommentRoutePostedData.Text) {
+	if isEmpty(CommentRoutePostedData.Token) || CommentRoutePostedData.Uuid == 0 || CommentRoutePostedData.Post_id == 0 || isEmpty(CommentRoutePostedData.Text) {
 		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | post_id | text | uuid is Missing"))
 		return
 	}
@@ -328,7 +330,7 @@ func addCommentRoute(c *gin.Context) {
 	if Ok {
 		// passing the other data to add the comment.
 		result := add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken)
-		if result.OK {
+		if result.Ok {
 			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
 			return
 		}
@@ -352,7 +354,7 @@ func addLikeRoute(c *gin.Context) {
 	var LikeRoutePostedData TokenizedLike;
 	c.BindJSON(&LikeRoutePostedData)
 
-	if isEmpty(LikeRoutePostedData.Token) || isEmpty(LikeRoutePostedData.Uuid) ||  isEmpty(LikeRoutePostedData.Post_id) {
+	if isEmpty(LikeRoutePostedData.Token) || LikeRoutePostedData.Uuid == 0 ||  LikeRoutePostedData.Post_id == 0 {
 		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
 		return 
 	}
@@ -364,6 +366,40 @@ func addLikeRoute(c *gin.Context) {
 		result := add_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
 		
 		if result.Ok {
+			var data Like;
+			
+			data.Post_id = LikeRoutePostedData.Post_id
+			data.Uuid = LikeRoutePostedData.Uuid
+			data.User_ = getUserById(data.Uuid)
+
+			c.JSON(http.StatusOK, MakeServerResponse(200, data))
+			return
+		}
+		
+		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		return
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+}
+
+func RemoveLikeRoute(c *gin.Context) {
+
+	var LikeRoutePostedData TokenizedLike;
+	c.BindJSON(&LikeRoutePostedData)
+
+	if isEmpty(LikeRoutePostedData.Token) || LikeRoutePostedData.Uuid == 0 ||  LikeRoutePostedData.Post_id == 0 {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
+		return 
+	}
+
+	AccessToken, Ok := GetTokenFromJwt(LikeRoutePostedData.Token)
+
+	if Ok {
+		// passing the other data to add the Like.
+		result := remove_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
+		
+		if result.Ok {
 			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
 			return
 		}
@@ -373,4 +409,5 @@ func addLikeRoute(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+
 }

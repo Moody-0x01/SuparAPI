@@ -267,8 +267,8 @@ func GetUserByJWToken(JWToken string) (User, bool) {
 	}
 }
 
-func GetUserIdByToken(t strint) (int, bool) {
-	var id = int;
+func GetUserIdByToken(t string) (int, bool) {
+	var id int
 	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
 	defer row.Close()
 
@@ -436,6 +436,7 @@ func updateUser(field string, newValue string, Token string) Result {
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
 			uuid, OK := getuuidByToken(Token)
+			
 			if OK {
 				OK, newValue = addAvatar_ToCDN(uuid, newValue)
 				fmt.Println("path: ", newValue)
@@ -443,6 +444,7 @@ func updateUser(field string, newValue string, Token string) Result {
 			}
 
 			break		
+
 		case "BIO":
 			Query = "UPDATE USERS SET BIO=? WHERE TOKEN=?"
 			ok = true
@@ -453,11 +455,13 @@ func updateUser(field string, newValue string, Token string) Result {
 			ok = true
 			break		
 		case "BG":
+			
 			Query = "UPDATE USERS SET BG=? WHERE TOKEN=?"
+			
 			uuid, OK := getuuidByToken(Token)
 			
-			if OK {				
-				OK, newValue := addbackground_ToCDN(uuid, newValue)
+			if OK {
+				OK, newValue = addbackground_ToCDN(uuid, newValue)
 				fmt.Println("path: ", newValue)
 				ok = OK
 			}
@@ -577,6 +581,34 @@ func add_like(uuid int, PostId int, Token string) Result {
 	
 }
 
+func remove_like(uuid int, PostId int, Token string) Result {
+	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
+	// uuid INTEGER,
+	// post_id INTEGER
+
+	id, ok := GetUserIdByToken(Token)
+
+	if ok {
+		if id == uuid {
+			stmt, _ := dataBase.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
+			_, err := stmt.Exec(uuid, PostId)
+
+			if err != nil {
+				fmt.Println("ERR: ", err)
+				return MakeServerResult(false, "could not add like to db.")
+			}
+
+			return MakeServerResult(true, "success")
+		}
+
+		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+	}
+
+	return MakeServerResult(false, "coult not get user id.")
+	
+}
+
+
 func get_comments(PostId int) []Comment {
 	// finished this one.
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -586,7 +618,7 @@ func get_comments(PostId int) []Comment {
 	
 	var comments []Comment
 
-	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WEHRE post_id=?", PostId)
+	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=?", PostId)
 	
 	defer row.Close()
 
@@ -610,7 +642,7 @@ func get_likes(PostId int) []Like {
 
 	var likes []Like
 
-	row, err := dataBase.Query("SELECT uuid FROM LIKES WEHRE post_id=?", PostId)
+	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=?", PostId)
 	
 	defer row.Close()
 
@@ -622,11 +654,9 @@ func get_likes(PostId int) []Like {
 	var temp Like
 
 	for row.Next() {
-		
-		row.Scan(&temp.Id_, &temp.Uuid, &temp.Text);
+	row.Scan(&temp.Id_,&temp.Uuid)
 		temp.User_ = getUserById(temp.Uuid)
 		likes = append(likes, temp)
-
 	}
 
 	return likes
