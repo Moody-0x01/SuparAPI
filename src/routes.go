@@ -264,16 +264,113 @@ func DeletePost(c *gin.Context) {
 }
 
 
+func getPostComments(c *gin.Context) {
+	var post_id string = c.Param("pid")
+	pid_, err := strconv.Atoi(post_id)
 
+	if err != nil {
+		c.JSON(http.StatusOK, MakeServerResponse(0, "make sure post_id is an integer"))
+		return 
+	}
+	
+	var comments []Comment = get_comments(pid_);
 
+	c.JSON(http.StatusOK, MakeServerResponse(200, comments))
+}
 
+func getPostLikes(c *gin.Context) {
+	var post_id string = c.Param("pid")
+	pid_, err := strconv.Atoi(post_id)
 
+	if err != nil {
+		c.JSON(http.StatusOK, MakeServerResponse(0, "make sure post_id is an integer"))
+		return 
+	}
+	
+	var likes []Like = get_likes(pid_);
 
+	c.JSON(http.StatusOK, MakeServerResponse(200, likes))
+}
 
+// type TokenizedComment struct {
+// 	Post_id		 int `json:"post_id"`
+// 	Uuid		 int `json:"uuid"`
+// 	Text		 string `json:"text"`
+// 	Token        string `json:"token"`
+// }
 
+// type TokenizedLike struct {
+// 	Post_id		 int `json:"post_id"`
+// 	Uuid		 int `json:"uuid"`
+// 	Token        string `json:"token"`
+// }
 
+func addCommentRoute(c *gin.Context) {
+	/*  Excpects: 
+		{
+			"post_id": str
+			"token": v, // SO a user only can add his own comments.. SECURITY LESS GOO
+			"uuid": int,
+			"text": str,
+		}  
+	*/
 
+	var CommentRoutePostedData TokenizedComment
+	c.BindJSON(&CommentRoutePostedData)
 
+	if isEmpty(CommentRoutePostedData.Token) || isEmpty(CommentRoutePostedData.Uuid) ||  isEmpty(CommentRoutePostedData.Post_id) || isEmpty(CommentRoutePostedData.Text) {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | post_id | text | uuid is Missing"))
+		return
+	}
 
+	AccessToken, Ok := GetTokenFromJwt(CommentRoutePostedData.Token)
 
+	if Ok {
+		// passing the other data to add the comment.
+		result := add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken)
+		if result.OK {
+			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
+			return
+		}
+		
+		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		return
+	}
 
+	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+}
+
+func addLikeRoute(c *gin.Context) {
+	/*  Excpects:
+		{
+			"post_id": str
+			"token": v, // SO a user only can add his own comments.. SECURITY LESS GOO
+			"uuid": int
+		}  
+	}  */
+
+	var LikeRoutePostedData TokenizedLike;
+	c.BindJSON(&LikeRoutePostedData)
+
+	if isEmpty(LikeRoutePostedData.Token) || isEmpty(LikeRoutePostedData.Uuid) ||  isEmpty(LikeRoutePostedData.Post_id) {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
+		return 
+	}
+
+	AccessToken, Ok := GetTokenFromJwt(LikeRoutePostedData.Token)
+
+	if Ok {
+		// passing the other data to add the Like.
+		result := add_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
+		
+		if result.Ok {
+			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
+			return
+		}
+		
+		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		return
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+}

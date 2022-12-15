@@ -35,10 +35,22 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         USER_ID INTEGER,
         Text TEXT,
-        IMG TEXT,
-        LIKES INTEGER DEFAULT 0
+        IMG TEXT
     );
 
+    CREATE TABLE COMMENTS (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid INTEGER,
+        post_id integer,
+        comment_text TEXT
+    );
+
+    CREATE TABLE LIKES (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid INTEGER,
+        post_id INTEGER
+    );
+    
 ```
 
 

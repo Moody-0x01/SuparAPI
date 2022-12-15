@@ -122,7 +122,7 @@ func getUserPostById(id int) []Post {
 
 
 
-func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
+func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Result) {
 	var EmptyUser User
 
 	if CheckUser(Email) {
@@ -134,7 +134,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
 
 		if err != nil {
 			fmt.Println(err)
-			return user, MakeServerError(false, "Could not get user from db. 82")
+			return user, MakeServerResult(false, "Could not get user from db. 82")
 		}
 
 		var pwdHash string
@@ -149,7 +149,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
 			defer row.Close()
 
 			if err != nil {
-				return user, MakeServerError(false, "Could not get user from db. 97")
+				return user, MakeServerResult(false, "Could not get user from db. 97")
 			}
 
 			for row.Next() {
@@ -160,17 +160,17 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Error) {
 
 			if err == nil {
 				user.Token = JWT
-				return user, MakeServerError(true, "User created! you can login now..")
+				return user, MakeServerResult(true, "User created! you can login now..")
 			}
 
 
-			return EmptyUser, MakeServerError(false, "Server had a problem encoding the token..")
+			return EmptyUser, MakeServerResult(false, "Server had a problem encoding the token..")
 		}
 		
-		return user, MakeServerError(false, "incorrect password. try again")
+		return user, MakeServerResult(false, "incorrect password. try again")
 	}
 
-	return EmptyUser, MakeServerError(false, "incorrect Email.. check and try again!")
+	return EmptyUser, MakeServerResult(false, "incorrect Email.. check and try again!")
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------
@@ -265,6 +265,23 @@ func GetUserByJWToken(JWToken string) (User, bool) {
 		var EmptyUser User
 		return EmptyUser, true
 	}
+}
+
+func GetUserIdByToken(t strint) (int, bool) {
+	var id = int;
+	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return id, false
+	}
+
+	for row.Next() {
+		row.Scan(&id)
+	}
+
+	return id, true
 }
 
 func GetUserByToken(Token string) User {
@@ -409,7 +426,7 @@ func getuuidByToken(Token string) (int, bool) {
 	return uuid, true
 }
 
-func updateUser(field string, newValue string, Token string) Error {
+func updateUser(field string, newValue string, Token string) Result {
 	
 	var ok bool;
 	var Query string
@@ -428,6 +445,7 @@ func updateUser(field string, newValue string, Token string) Error {
 			break		
 		case "BIO":
 			Query = "UPDATE USERS SET BIO=? WHERE TOKEN=?"
+			ok = true
 			break
 
 		case "ADDR":
@@ -463,17 +481,18 @@ func updateUser(field string, newValue string, Token string) Error {
 
 		if err != nil {
 			fmt.Println("db err: ", err)
-			return MakeServerError(false, "db err, could not update.")
+			return MakeServerResult(false, "db err, could not update.")
 		}
 
-		return MakeServerError(true, "success!")
+		return MakeServerResult(true, "success!")
 	}
 
-	return MakeServerError(false, "Unexpected field name, or could not find user by token..")
+	return MakeServerResult(false, "Unexpected field name, or could not find user by token..")
+
 }
 
 
-func AddPost(Text string, Img string, uuid int) Error {
+func AddPost(Text string, Img string, uuid int) Result {
 
 	if !isEmpty(Img) {
 		var pid int = GetNextUID("Posts")
@@ -483,7 +502,7 @@ func AddPost(Text string, Img string, uuid int) Error {
 		ok, Img = addPostImg_ToCDN(uuid, Img, pid) // (bool, string)
 	
 		if !ok {
-			return MakeServerError(false, "could not add post img to cdn.. err L480")
+			return MakeServerResult(false, "could not add post img to cdn.. err L480")
 		}
 
 	}
@@ -492,13 +511,123 @@ func AddPost(Text string, Img string, uuid int) Error {
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil {
-		return MakeServerError(false, "could not add post. err L489")
+		return MakeServerResult(false, "could not add post. err L489")
 	}
 
-	return MakeServerError(true, "success!")
+	return MakeServerResult(true, "success!")
 }
 
 // TODO Add comment feeature.
 
 // TODO Add likes feature.
 // TODO Add FOLLOW/UNFOLLOW feature.
+
+func add_comment(uuid int, commentText string, PostId int, Token string) Result {
+	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    // uuid INTEGER,
+    // post_id integer,
+    // comment_text TEXT
+    
+    id, ok := GetUserIdByToken(Token)
+    if ok {
+    	if id == uuid {
+    		stmt, _ := dataBase.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
+			_, err := stmt.Exec(uuid, PostId, commentText)
+
+			if err != nil {
+				fmt.Println("ERR: ", err)
+				return MakeServerResult(false, "could not add comment to db.")
+			}
+
+			return MakeServerResult(true, "success")
+    	}	
+		
+		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+
+    }
+
+    return MakeServerResult(false, "coult not get user id.")
+	
+}
+
+func add_like(uuid int, PostId int, Token string) Result {
+	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
+	// uuid INTEGER,
+	// post_id INTEGER
+
+	id, ok := GetUserIdByToken(Token)
+
+	if ok {
+		if id == uuid {
+			stmt, _ := dataBase.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
+			_, err := stmt.Exec(uuid, PostId)
+
+			if err != nil {
+				fmt.Println("ERR: ", err)
+				return MakeServerResult(false, "could not add like to db.")
+			}
+
+			return MakeServerResult(true, "success")	
+		}
+
+		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+	}
+
+	return MakeServerResult(false, "coult not get user id.")
+	
+}
+
+func get_comments(PostId int) []Comment {
+	// finished this one.
+	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    // uuid INTEGER,
+    // post_id integer,
+    // comment_text TEXT
+	
+	var comments []Comment
+
+	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WEHRE post_id=?", PostId)
+	
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return comments
+	}
+
+	var temp Comment
+
+	for row.Next() {
+		row.Scan(&temp.Id_, &temp.Uuid, &temp.Text);
+		temp.User_ = getUserById(temp.Uuid)
+		comments = append(comments, temp)
+	}
+
+	return comments
+}
+
+func get_likes(PostId int) []Like {
+
+	var likes []Like
+
+	row, err := dataBase.Query("SELECT uuid FROM LIKES WEHRE post_id=?", PostId)
+	
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return likes
+	}
+
+	var temp Like
+
+	for row.Next() {
+		
+		row.Scan(&temp.Id_, &temp.Uuid, &temp.Text);
+		temp.User_ = getUserById(temp.Uuid)
+		likes = append(likes, temp)
+
+	}
+
+	return likes
+}

@@ -46,13 +46,17 @@ func run() {
 	router.POST("/NewPost", NewPost) // adding a post by token.
 	router.POST("/DeletePost", DeletePost) // Deleting a post by token
 	router.POST("/signup", signUp) // Making new account
-
+	router.POST("/comment", addCommentRoute) // For likes
+	router.POST("/like", addLikeRoute) // For comments
+	
 	// Get routes.
 	router.GET("/getUserPosts", getUserPostsRoute) // gettting user post by id
 	router.GET("/GetAllPosts", GetAllPostsRoute) // getting all posts
 	router.GET("/query", getUsersRoute) // user look up by name
 	router.GET("/:uuid", getUserByIdRoute) // get user by id
-	
+	router.GET("/getComments/:pid", getPostComments)
+	router.GET("/getLikes/:pid", getPostLikes)
+
 	// running the server.
 	fmt.Println("Serving in port", port) 	
 	router.Run(port)

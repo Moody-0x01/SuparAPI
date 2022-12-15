@@ -29,6 +29,24 @@ type AUser struct {
 	Address		 string `json:"addr"`
 }
 
+
+type Comment struct {
+	Id_          int `json:"id_"`
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	Text		 string `json:"text"`
+	User_		 AUser `json:"user"` // Filled when fitching comments.
+}
+
+type Like struct {
+	Id_          int `json:"id_"`
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	User_		 AUser `json:"user"` // Filled when fitching comments.
+}
+
+
+
 // for fetch posts
 type Post struct {
 	Id_  int 	`json:"id"`
@@ -42,11 +60,13 @@ type Post struct {
 func (U *User) setDefaults() {
 	//TODO Setting the default fields to add to the db if some are not present.
 	/*
+	
 	THOSE ARE THE FIELDS TO BE CHANGED if they were not set.
 		Img 		 string `json:"img"`
 		Bg 			 string `json:"bg"`
 		Bio 		 string `json:"bio"`
 		Address		 string `json:"addr"`
+		
 	*/
 
 	if isEmpty(U.Img) {
@@ -68,7 +88,7 @@ func (U *User) setDefaults() {
 
 
 
-type Error struct {
+type Result struct {
 	Ok   bool `json:"ok"`
 	Text string `json:"text"`
 }
@@ -91,7 +111,18 @@ type TokenizedPost struct {
 	Img   string `json:"img"`
 }
 
+type TokenizedComment struct {
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	Text		 string `json:"text"`
+	Token        string `json:"token"`
+}
 
+type TokenizedLike struct {
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	Token        string `json:"token"`
+}
 
 type UserLogin struct {
 	Password string `json:"Password"`
@@ -115,6 +146,13 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case []Post:
 			Resp.Data = data.([]Post)
 			break
+		case []Like:
+			Resp.Data = data.([]Like)
+			break
+
+		case []Comment:
+			Resp.Data = data.([]Comment)
+			break
 
 		case []User:
 			Resp.Data = data.([]User)
@@ -122,6 +160,14 @@ func MakeServerResponse(code int, data interface{}) Response {
 
 		case []AUser:
 			Resp.Data = data.([]AUser)
+			break
+
+		case Like:
+			Resp.Data = data.(Like)
+			break
+
+		case Comment:
+			Resp.Data = data.(Comment)
 			break
 
 		case AUser:
@@ -148,8 +194,8 @@ func MakeServerResponse(code int, data interface{}) Response {
 	return Resp
 }
 
-func MakeServerError(ok bool, t string) Error {
-	var e Error
+func MakeServerResult(ok bool, t string) Result {
+	var e Result
 	e.Ok = ok
 	e.Text = t
 	return e
