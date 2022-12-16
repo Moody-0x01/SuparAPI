@@ -17,6 +17,7 @@ NOTE: This section will be updated regularily once I add or remove a route.
 ### Database (Tables and schema.)
 
 I have used only 2 tables just because I did not want to overcomplicate things, but more will be added as m progressing in this project.
+
 ```sql
 
     CREATE TABLE USERS (
@@ -52,8 +53,7 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
     );
     
 ```
-
-
+- Note: Adding more data fields and appropriate type is kinda crucial, but this is it for now.
 
 ### Files and folders
 
@@ -71,6 +71,7 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
 
 - I have recently added a cdn to be connected to once the api has images and other file to save and retrieve
 Here is the [link](https://github.com/Moody0101-X/Zimg_cdn)
+
 #### CDN connection
 
 ```go
@@ -91,3 +92,4 @@ const addPOST string = api + "/Zimg/NewPostImg"
 ### front-end app.
 
 - to see the front-end app that is using this api go [Here](https://github.com/Moody0101-X/SM_app)
+

@@ -45,9 +45,19 @@ type Like struct {
 	User_		 AUser `json:"user"` // Filled when fitching comments.
 }
 
+type TFollow struct {
+	Id_        		int `json:"id_"`
+	Follower_id		int `json:"follower_id"`
+	Followed_id		int `json:"follower_id"`
+	UToken			string `json:"token"`
+}
+
+type Follow struct {
+	
+}
 
 
-// for fetch posts
+
 type Post struct {
 	Id_  int 	`json:"id"`
 	Uid_ int 	`json:"uuid"`

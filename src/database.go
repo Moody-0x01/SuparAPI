@@ -10,14 +10,16 @@ var dataBase *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
 
-func initializeDb() (e error) {
+func initializeDb() (error, string) {
+	
 	var err error
+	var dbPath string = "./db/Users.db?cache=shared&mode=rwc"
 
-	dataBase, err = sql.Open("sqlite3", "./db/Users.db?cache=shared&mode=rwc"); if err != nil {
-		return err
+	dataBase, err = sql.Open("sqlite3", dbPath); if err != nil {
+		return err, ""
 	}
 
-	return nil
+	return nil, dbPath
 }
 
 
@@ -618,7 +620,7 @@ func get_comments(PostId int) []Comment {
 	
 	var comments []Comment
 
-	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=?", PostId)
+	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
 	
 	defer row.Close()
 
@@ -642,7 +644,7 @@ func get_likes(PostId int) []Like {
 
 	var likes []Like
 
-	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=?", PostId)
+	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
 	
 	defer row.Close()
 
@@ -660,4 +662,27 @@ func get_likes(PostId int) []Like {
 	}
 
 	return likes
+}
+
+// GET Followers. by id.
+// Add follower.
+// 
+// for fetch posts
+
+// TODO Add follower, Notification+++
+
+func follow(follower_id int, followed_id int) {
+	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
+}
+
+func unfollow(follower_id int, followed_id int) {
+	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
+}
+
+func pushNotification() {
+	// Add Later.
+}
+
+func getFollowers(followed int) {
+	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
 }

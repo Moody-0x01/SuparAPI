@@ -15,22 +15,22 @@ var (
 
 
 
-// func RequestCancelRecover() gin.HandlerFunc {
+func RequestCancelRecover() gin.HandlerFunc {
 	
-// 	return func(c *gin.Context) {
-// 		defer func() {
+	return func(c *gin.Context) {
+		defer func() {
 			
-// 			if err := recover(); err != nil {
-// 				fmt.Println("client cancel the request")
-// 				c.Request.Context().Done()
-// 			}
+			if err := recover(); err != nil {
+				fmt.Println("client cancel the request")
+				c.Request.Context().Done()
+			}
 
-// 		}()
+		}()
 		
-// 		c.Next()
-// 	}
+		c.Next()
+	}
 
-// }
+}
 
 
 func run() {
@@ -38,7 +38,7 @@ func run() {
 
 	router := gin.Default()
 	router.Use(cors.Default())	
-	// router.Use(gin.Logger(), RequestCancelRecover())
+	router.Use(gin.Logger(), RequestCancelRecover())
 	
 	// POST routes.
 	router.POST("/login", login) // login and get a token for the updating/creation/deletion of personal data.
@@ -64,12 +64,14 @@ func run() {
 }
 
 func main() {
-	err := initializeDb();
+	err, path := initializeDb();
 	
 	if err != nil {
         fmt.Println("Error opening the database! ", err.Error())
         return
     }
+
+    fmt.Println("connected to db: ", path)
 
 	run()
 }
