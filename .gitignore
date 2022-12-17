@@ -9,6 +9,7 @@ db
 # binary builds
 /src/build
 build
+public
 *.exe
 
 # Commit tracker

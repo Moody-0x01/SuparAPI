@@ -7,6 +7,10 @@ import (
 	"strconv"
 )
 
+func index(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
+
 func GetAllPostsRoute(c *gin.Context) {
 	All := GetAllPosts()
 	var res Response = MakeServerResponse(200, All)

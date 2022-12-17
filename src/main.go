@@ -39,24 +39,35 @@ func run() {
 	router := gin.Default()
 	router.Use(cors.Default())	
 	router.Use(gin.Logger(), RequestCancelRecover())
+	// HTML/JS/CSS/IMG loaders
+	router.Static("/static", "./public/static")
+	router.Static("/img", "./public/img")
 	
+	router.LoadHTMLGlob("public/*.html")
+
 	// POST routes.
-	router.POST("/login", login) // login and get a token for the updating/creation/deletion of personal data.
-	router.POST("update", update) // Updating user's information by token
-	router.POST("/NewPost", NewPost) // adding a post by token.
-	router.POST("/DeletePost", DeletePost) // Deleting a post by token
-	router.POST("/signup", signUp) // Making new account
-	router.POST("/comment", addCommentRoute) // For likes
-	router.POST("/like", addLikeRoute) // For comments
-	router.POST("/like/remove", RemoveLikeRoute)
+	router.POST("/v2/login", login) // login and get a token for the updating/creation/deletion of personal data.
+	router.POST("/v2/update", update) // Updating user's information by token
+	router.POST("/v2/NewPost", NewPost) // adding a post by token.
+	router.POST("/v2/DeletePost", DeletePost) // Deleting a post by token
+	router.POST("/v2/signup", signUp) // Making new account
+	router.POST("/v2/comment", addCommentRoute) // For likes
+	router.POST("/v2/like", addLikeRoute) // For comments
+	router.POST("/v2/like/remove", RemoveLikeRoute)
 	
 	// Get routes.
-	router.GET("/getUserPosts", getUserPostsRoute) // gettting user post by id
-	router.GET("/GetAllPosts", GetAllPostsRoute) // getting all posts
-	router.GET("/query", getUsersRoute) // user look up by name
-	router.GET("/:uuid", getUserByIdRoute) // get user by id
-	router.GET("/getComments/:pid", getPostComments)
-	router.GET("/getLikes/:pid", getPostLikes)
+	
+	
+	router.GET("/v2/getUserPosts", getUserPostsRoute) // gettting user post by id
+	router.GET("/v2/GetAllPosts", GetAllPostsRoute) // getting all posts
+	router.GET("/v2/query", getUsersRoute) // user look up by name
+	router.GET("/v2/:uuid", getUserByIdRoute) // get user by id
+	router.GET("/v2/getComments/:pid", getPostComments)
+	router.GET("/v2/getLikes/:pid", getPostLikes)
+	// router.Static("/", "./public")
+	router.GET("/", index)
+
+    router.NoRoute(index)
 
 	// running the server.
 	fmt.Println("Serving in port", port) 	

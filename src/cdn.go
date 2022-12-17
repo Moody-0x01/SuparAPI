@@ -11,7 +11,7 @@ import (
 )
 
 
-const api string = "http://localhost:8500"
+const api string = "http://192.168.79.20:8500"
 const addIMG string = api + "/Zimg/addAvatar"
 const addBG string = api + "/Zimg/addbg"
 const addPOST string = api + "/Zimg/NewPostImg"

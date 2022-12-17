@@ -671,18 +671,18 @@ func get_likes(PostId int) []Like {
 
 // TODO Add follower, Notification+++
 
-func follow(follower_id int, followed_id int) {
-	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
-}
+// func follow(follower_id int, followed_id int) {
+// 	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
+// }
 
-func unfollow(follower_id int, followed_id int) {
-	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
-}
+// func unfollow(follower_id int, followed_id int) {
+// 	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
+// }
 
-func pushNotification() {
-	// Add Later.
-}
+// func pushNotification() {
+// 	// Add Later.
+// }
 
-func getFollowers(followed int) {
-	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
-}
+// func getFollowers(followed int) {
+// 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
+// }
