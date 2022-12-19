@@ -29,6 +29,30 @@ type AUser struct {
 	Address		 string `json:"addr"`
 }
 
+type WSocketAccessController struct {
+	Uuid 	int `json:"uuid"`
+}
+
+// type userConn struct {
+// 	Connection string
+// 	uuid string
+// 	Connectionid_ string
+// }
+// type clients struct {
+// 	clients []userConn
+// }
+// func (*clients c) sendMsg() {
+// 	b := make([]byte, 1024)
+	
+// 	for i := 0; i < len(clients); i++ {
+	
+// 		n, err := clients[i].sendbytes(b)
+// 		if err != nil {
+// 			return 
+// 		}
+// 	}	
+// }
+
 type Comment struct {
 	Id_          int `json:"id_"`
 	Post_id		 int `json:"post_id"`

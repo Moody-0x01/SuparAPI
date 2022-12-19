@@ -433,14 +433,81 @@ func getUserFollowersById(c *gin.Context) {
 
 func followRoute(c *gin.Context) {
 	//  Gets the follower_id and the one that wants to be added.
-	notImplemented(c);
+	var UData TFollow;
+
+	c.BindJSON(&UData)
+
+	if isEmpty(UData.UToken) || UData.Follower_id == 0 || UData.Followed_id == 0 {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
+		return 
+	}
+
+	// type  struct {
+	// 	Id_        		int `json:"id_"`
+	// 	Follower_id		int `json:"follower_id"`
+	// 	Followed_id		int `json:"follower_id"`
+	// 	UToken			string `json:"token"`
+	// }
+
+	AccessToken, Ok := GetTokenFromJwt(UData.UToken)
+
+	if Ok {
+		// passing the other data to add the Like.
+		result := follow(UData.Follower_id, UData.Followed_id, AccessToken)
+		
+		if result.Ok {
+			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
+			return
+		}
+		
+		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		return
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+
+
+	// notImplemented(c);
 }
 
 func unfollowRoute(c *gin.Context) {
-	//  More....
+	
+	var UData TFollow;
+	c.BindJSON(&UData)
+
+	if isEmpty(UData.UToken) || UData.Follower_id == 0 || UData.Followed_id == 0 {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
+		return 
+	}
+
+	// type  struct {
+	// 	Id_        		int `json:"id_"`
+	// 	Follower_id		int `json:"follower_id"`
+	// 	Followed_id		int `json:"follower_id"`
+	// 	UToken			string `json:"token"`
+	// }
+
+	AccessToken, Ok := GetTokenFromJwt(UData.UToken)
+
+	if Ok {
+		// passing the other data to add the unfollow event..
+		result := unfollow(UData.Follower_id, UData.Followed_id, AccessToken)
+
+		if result.Ok {
+			c.JSON(http.StatusOK, MakeServerResponse(200, result.Text))
+			return
+		}
+		
+		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		return
+	}
+
+	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
+
 	notImplemented(c);
 }
 
 func notImplemented(c *gin.Context) {
 	c.JSON(http.StatusOK, MakeServerResponse(100, "Not implemented!"))	
 }
+

@@ -29,6 +29,7 @@ import (
 var SecretJwtKey []byte = []byte("d700977a3b1e3fd0145853702bdbb2a522530bb9707d314209d07b81dff3c17a")
 
 /* DONE */
+
 func sha256_(s string) string {
     /* gets a string and returned a hash using sh256 */
     hash_ := sha256.New()

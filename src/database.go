@@ -642,10 +642,15 @@ func get_comments(PostId int) []Comment {
 
 func get_likes(PostId int) []Like {
 
+	/* 
+	map[string]&websocket.conn
+	map[uuid]&w
+	*/
+
 	var likes []Like
 
 	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
-	
+
 	defer row.Close()
 
 	if err != nil {
@@ -670,53 +675,52 @@ func get_likes(PostId int) []Like {
 // for fetch posts
 
 // TODO Add follower, Notification+++
+func follow(follower_id int, followed_id int, Token string) Result {
+	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
+	id, ok := GetUserIdByToken(Token)
 
-// func follow(follower_id int, followed_id int, Token string) Result {
-// 	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
-// 	id, ok := GetUserIdByToken(Token)
+	if ok {
+		if id == follower_id {
+			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
+			_, err := stmt.Exec(follower_id, followed_id)
 
-// 	if ok {
-// 		if id == uuid {
-// 			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
-// 			_, err := stmt.Exec(follower_id, followed_id)
+			if err != nil {
+				fmt.Println("ERR: ", err)
+				return MakeServerResult(false, "could not follow..")
+			}
 
-// 			if err != nil {
-// 				fmt.Println("ERR: ", err)
-// 				return MakeServerResult(false, "could not add like to db.")
-// 			}
+			return MakeServerResult(true, "success")
+		}
 
-// 			return MakeServerResult(true, "success")
-// 		}
+		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+	}
 
-// 		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
-// 	}
+	return MakeServerResult(false, "coult not get user id.")
+}
 
-// 	return MakeServerResult(false, "coult not get user id.")
-// }
+func unfollow(follower_id int, followed_id int, Token string) Result {
+	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
+	id, ok := GetUserIdByToken(Token)
 
-// func unfollow(follower_id int, followed_id int, Token string) Result {
-// 	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
-// 	id, ok := GetUserIdByToken(Token)
+	if ok {
+		if id == follower_id {
 
-// 	if ok {
-// 		if id == uuid {
+			stmt, _ := dataBase.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
+			_, err := stmt.Exec(follower_id, followed_id)
 
-// 			stmt, _ := dataBase.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
-// 			_, err := stmt.Exec(follower_id, followed_id)
+			if err != nil {
+				fmt.Println("ERR: ", err)
+				return MakeServerResult(false, "could not unfollow.")
+			}
 
-// 			if err != nil {
-// 				fmt.Println("ERR: ", err)
-// 				return MakeServerResult(false, "could not add like to db.")
-// 			}
+			return MakeServerResult(true, "success")
+		}
 
-// 			return MakeServerResult(true, "success")
-// 		}
+		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+	}
 
-// 		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
-// 	}
-
-// 	return MakeServerResult(false, "coult not get user id.")
-// }
+	return MakeServerResult(false, "coult not get user id.")
+}
 
 // func pushNotification() {
 // 	// Add Later.

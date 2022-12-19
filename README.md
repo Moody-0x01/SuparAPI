@@ -59,6 +59,16 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
         follower_id INTEGER
     );
 
+    CREATE TABLE NOTIFICATIONS (
+        
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        TYPE TEXT DEFAULT null, [follow | like | comment | ...]
+        USER_ID INTEGER,
+        OTHER_ID INTEGER,
+        PID INTEGER,
+        MSG TEXT DEFAULT null
+        ...
+    )
 
     
 ```
