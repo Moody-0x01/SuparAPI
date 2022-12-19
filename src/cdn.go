@@ -3,18 +3,34 @@ package main
 import (
 	// "fmt"
 	"log"
-    // "io/ioutil"
+    "io/ioutil"
     "net/http"
     // "net/url"
     "encoding/json"
     "bytes"
+    "strings"
 )
 
 
-const api string = "http://192.168.79.20:8500"
-const addIMG string = api + "/Zimg/addAvatar"
-const addBG string = api + "/Zimg/addbg"
-const addPOST string = api + "/Zimg/NewPostImg"
+
+var api string = getCdnLink("cdn.txt")
+// const api string = "http://192.168.79.20:8500"
+var addIMG string = api + "/Zimg/addAvatar"
+var addBG string = api + "/Zimg/addbg"
+var addPOST string = api + "/Zimg/NewPostImg"
+
+func getCdnLink(fname string) string {
+
+    body, err := ioutil.ReadFile(fname)
+    
+    if err != nil {
+        log.Fatalf("unable to read file: %v", err)
+    }
+
+    var next string = strings.TrimSpace(string(body))
+    next = strings.Trim(next, "\n")
+    return next
+}
 
 func addAvatar_ToCDN(uuid int, Mime string) (bool, string) {
 
@@ -33,7 +49,7 @@ func addAvatar_ToCDN(uuid int, Mime string) (bool, string) {
 
     if err != nil {
         log.Fatal(err)
-    };
+    }
 
     var res map[string]interface{};
 
@@ -47,7 +63,7 @@ func addAvatar_ToCDN(uuid int, Mime string) (bool, string) {
 }
 
 func addbackground_ToCDN(uuid int , Mime string) (bool, string) {
-    
+
     if Mime == DefaultUserBg {
         return true, DefaultUserBg
     }
@@ -74,11 +90,10 @@ func addbackground_ToCDN(uuid int , Mime string) (bool, string) {
     } 
     
     return false, res["data"].(string)
-
 }
 
 func addPostImg_ToCDN(uuid int, Mime string, pid int) (bool, string) {
-	
+    
 	values := make(map[string]interface{})
     
     values["id"] = uuid;

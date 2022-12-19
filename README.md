@@ -51,6 +51,15 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
         uuid INTEGER,
         post_id INTEGER
     );
+
+
+    CREATE TABLE FOLLOWERS (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        followed_id INTEGER
+        follower_id INTEGER
+    );
+
+
     
 ```
 - Note: Adding more data fields and appropriate type is kinda crucial, but this is it for now.

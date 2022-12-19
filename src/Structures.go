@@ -29,7 +29,6 @@ type AUser struct {
 	Address		 string `json:"addr"`
 }
 
-
 type Comment struct {
 	Id_          int `json:"id_"`
 	Post_id		 int `json:"post_id"`
@@ -53,10 +52,10 @@ type TFollow struct {
 }
 
 type Follow struct {
-	
+	Id_        		int `json:"id_"`
+	Follower_id		int `json:"follower_id"`
+	Followed_id		int `json:"follower_id"`
 }
-
-
 
 type Post struct {
 	Id_  int 	`json:"id"`
@@ -69,14 +68,14 @@ type Post struct {
 
 func (U *User) setDefaults() {
 	//TODO Setting the default fields to add to the db if some are not present.
-	/*
 	
-	THOSE ARE THE FIELDS TO BE CHANGED if they were not set.
-		Img 		 string `json:"img"`
-		Bg 			 string `json:"bg"`
-		Bio 		 string `json:"bio"`
-		Address		 string `json:"addr"`
-		
+	/*
+		THOSE ARE THE FIELDS TO BE CHANGED if they were not set.
+			Img 		 string `json:"img"`
+			Bg 			 string `json:"bg"`
+			Bio 		 string `json:"bio"`
+			Address		 string `json:"addr"`
+
 	*/
 
 	if isEmpty(U.Img) {
@@ -147,8 +146,7 @@ type Response struct {
 }
 
 func MakeServerResponse(code int, data interface{}) Response {
-	
-	var Resp Response;
+	var Resp Response
 	Resp.Code = code
 
 	switch data.(type) {

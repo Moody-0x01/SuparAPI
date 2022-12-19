@@ -671,18 +671,79 @@ func get_likes(PostId int) []Like {
 
 // TODO Add follower, Notification+++
 
-// func follow(follower_id int, followed_id int) {
+// func follow(follower_id int, followed_id int, Token string) Result {
 // 	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
+// 	id, ok := GetUserIdByToken(Token)
+
+// 	if ok {
+// 		if id == uuid {
+// 			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
+// 			_, err := stmt.Exec(follower_id, followed_id)
+
+// 			if err != nil {
+// 				fmt.Println("ERR: ", err)
+// 				return MakeServerResult(false, "could not add like to db.")
+// 			}
+
+// 			return MakeServerResult(true, "success")
+// 		}
+
+// 		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+// 	}
+
+// 	return MakeServerResult(false, "coult not get user id.")
 // }
 
-// func unfollow(follower_id int, followed_id int) {
+// func unfollow(follower_id int, followed_id int, Token string) Result {
 // 	// "DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?"
+// 	id, ok := GetUserIdByToken(Token)
+
+// 	if ok {
+// 		if id == uuid {
+
+// 			stmt, _ := dataBase.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
+// 			_, err := stmt.Exec(follower_id, followed_id)
+
+// 			if err != nil {
+// 				fmt.Println("ERR: ", err)
+// 				return MakeServerResult(false, "could not add like to db.")
+// 			}
+
+// 			return MakeServerResult(true, "success")
+// 		}
+
+// 		return MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
+// 	}
+
+// 	return MakeServerResult(false, "coult not get user id.")
 // }
 
 // func pushNotification() {
 // 	// Add Later.
 // }
 
-// func getFollowers(followed int) {
-// 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
-// }
+func getFollowers(followed int) []AUser {
+	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
+	var followers []AUser;
+
+	row, err := dataBase.Query("SELECT follower_id FROM LIKES WHERE followed_id=? ORDER BY ID DESC", followed)
+	
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return followers
+	}
+
+	var uuid int
+	var temp AUser
+
+	for row.Next() {
+		row.Scan(&uuid)
+		temp = getUserById(uuid)
+		followers = append(followers, temp)
+	}
+
+
+	return followers
+}

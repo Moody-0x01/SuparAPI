@@ -415,3 +415,32 @@ func RemoveLikeRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
 
 }
+
+
+func getUserFollowersById(c *gin.Context) {
+	
+	var uuid string = c.Param("uuid")
+	
+	uuid_, err := strconv.Atoi( uuid )
+
+	if err != nil {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		return
+	}
+	var followers []AUser = getFollowers( uuid_ );
+	c.JSON(http.StatusOK, MakeServerResponse(200, followers))
+}
+
+func followRoute(c *gin.Context) {
+	//  Gets the follower_id and the one that wants to be added.
+	notImplemented(c);
+}
+
+func unfollowRoute(c *gin.Context) {
+	//  More....
+	notImplemented(c);
+}
+
+func notImplemented(c *gin.Context) {
+	c.JSON(http.StatusOK, MakeServerResponse(100, "Not implemented!"))	
+}
