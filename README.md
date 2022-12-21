@@ -3,16 +3,33 @@
 # Go Api
 ### Routes
 NOTE: This section will be updated regularily once I add or remove a route.
+NOTE: alot of the front-end routes are locked if you are not logged in...
 
-- `/login` Login, can get a token or (password, Email) and if everything is valid it returns user info + Token.
-- `/getUserPosts` return the user's posts, and it gets an id_ form value as uuid.
-- `/GetAllPosts` return all the posts from db.
-- `/query` used to query a specific user. if not found then an empty list is returned or an error response code.
-- `/:uuid` quick user lookup by uuid.
-- `/signup` making an account. then returning the token to update, delete, add and other operation regarding ur account.
-- `/update` expects either a img, bio, addr or bg to be updated in the database, but also accepts a token that will be given if authenticated. if the token is not provided, the server will return error code 500.
-- `/NewPost` add new post with token, expects a token, img, uuid, and post text. if something is not set properly it will return a response report about the error.
-- `/DeletePost` deleting user post using userid, postid and jwt.
+- `/` the home page for my app. also can be accessed from `/Home` but only if you are logged in because you need a user profile to see posts and like/comment under them. it also has a post feature. img or text or both..s
+- `/signup` the page in which you can make an account
+- `/login` the page in which you can login
+- `/Accounts` the page to visualize all user account and look for someone.
+- `/Accounts/:uuid` see profile of a user by uuid.
+- `/v2/login` Login, can get a token or (password, Email) and if everything is valid it returns user info + Token.
+- `/v2/getUserPosts` return the user's posts, and it gets an id_ form value as uuid.
+- `/v2/GetAllPosts` return all the posts from db.
+- `/v2/query` used to query a specific user. if not found then an empty list is returned or an error response code.
+- `/v2/:uuid` quick user lookup by uuid.
+- `/v2/signup` making an account. then returning the token to update, delete, add and other operation regarding ur account.
+- `/v2/update` expects either a img, bio, addr or bg to be updated in the database, but also accepts a token that will be given if aut/v2henticated. if the token is not provided, the server will return error code 500.
+- `/v2/NewPost` add new post with token, expects a token, img, uuid, and post text. if something is not set properly it will return a response report about the error.
+- `/v2/DeletePost` deleting user post using userid, postid and jwt.
+- `/v2/comment` a route for commenting in posts and stuff.
+- `/v2/like` a route to add likes to posts
+- `/v2/like/remove` a route to remove a like from a posts.
+- `/v2/follow` a follow endpoint to follow users.
+- `/v2/unfollow` a route for unfollowing users.
+- `/v2/getFollowers/:uuid` getting the followers of a user. by uuid..
+- `/v2/getFollowings/:uuid` getting the followings of a user. by uuid..
+- `/v2/getComments/:pid` a route to get comments by pid (post id).
+- `/v2/getLikes/:pid` a route to get the likes of a certain post by id.
+
+NOTE: an interesting update is that all endpoints are prefixed by /v2 because I added my single page app and integrated the front-end route so anything that does not have /v2 is a front-end thing that returns html. and the opposite is an api endpoint.
 
 ### Database (Tables and schema.)
 

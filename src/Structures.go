@@ -1,5 +1,5 @@
 package main
-
+import "fmt"
 // Default fields for the user object.
 const DefaultUserImg string = "/img/defUser.jpg"
 const DefaultUserBg string = "/img/defBg.jpg"
@@ -20,13 +20,24 @@ type User struct {
 }
 
 
+// type Notification struct {
+//     TYPE TEXT DEFAULT null, [follow | like | comment | ...]
+//     USER_ID INTEGER,
+//     OTHER_ID INTEGER,
+//     PID INTEGER,
+//     MSG TEXT DEFAULT null
+//     ...
+
+// }
+
 type AUser struct {
 	Id_ 		 int `json:"id_"`
 	UserName 	 string `json:"UserName"`
-	Img 		 string `json:"img"`
+	Img		 	 string `json:"img"`
 	Bg 			 string `json:"bg"`
 	Bio 		 string `json:"bio"`
 	Address		 string `json:"addr"`
+	IsFollowed	 bool `json:"isfollowed"`
 }
 
 type WSocketAccessController struct {
@@ -71,7 +82,7 @@ type Like struct {
 type TFollow struct {
 	Id_        		int `json:"id_"`
 	Follower_id		int `json:"follower_id"`
-	Followed_id		int `json:"follower_id"`
+	Followed_id		int `json:"followed_id"`
 	UToken			string `json:"token"`
 }
 
@@ -193,6 +204,13 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case []AUser:
 			Resp.Data = data.([]AUser)
 			break
+		case []int:
+			Resp.Data = data.([]int)
+			break
+
+		case int:
+			Resp.Data = data.(int)
+			break
 
 		case Like:
 			Resp.Data = data.(Like)
@@ -218,8 +236,9 @@ func MakeServerResponse(code int, data interface{}) Response {
 			Resp.Data = data.(UserLogin)
 			break
 
+
 		default:
-			Resp.Data = data.(string)
+			fmt.Println("Unexpected data type. make sure it is added in MakeServerResponse(code int, data interface{}){ }")
 			break
 	}
 

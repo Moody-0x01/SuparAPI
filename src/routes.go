@@ -33,15 +33,43 @@ func getUserPostsRoute(c *gin.Context) {
 
 func getUsersRoute(c *gin.Context) {
 	var q string = GetFieldFromContext(c, "q")
-	var Users []AUser;
-	
-	if q != "" {
-		Users = getUsersByQuery(q)
-	} else {
-		Users = getUsers()
+	var uuid string = GetFieldFromContext(c, "uuid")
+	var uuid_ int;
+	var flag bool = false;
+	if !isEmpty(uuid) {
+		flag = true;
+		temp, err := strconv.Atoi(uuid)
+		uuid_ = temp
+
+		if err != nil {
+			c.JSON(http.StatusOK, MakeServerResponse(400, "make sure that uuid is a number."))
+			return
+		}
 	}
-	
-	c.JSON(http.StatusOK, MakeServerResponse(200, Users))
+
+	var Users []AUser;
+
+	if q != "" {
+		if flag {
+			Users = getUsersByQuery(q, uuid_)
+			c.JSON(http.StatusOK, MakeServerResponse(200, Users))
+			return
+		} else {
+			Users = getUsersByQuery(q, flag)	
+			c.JSON(http.StatusOK, MakeServerResponse(200, Users))
+			return
+		}
+	} else {
+		if flag {
+			Users = getUsers(uuid_)
+			c.JSON(http.StatusOK, MakeServerResponse(200, Users))
+			return
+		} else {
+			Users = getUsers(flag)
+			c.JSON(http.StatusOK, MakeServerResponse(200, Users))
+			return
+		}
+	}
 }
 
 func getUserByIdRoute(c *gin.Context) {
@@ -68,8 +96,6 @@ func login(c *gin.Context) {
 	c.BindJSON(&LoginForm);
 	
 	var resp Response
-
-
 
 	if len(LoginForm.Token) > 0 {
 		resp = AuthenticateUserJWT(LoginForm.Token)
@@ -417,6 +443,23 @@ func RemoveLikeRoute(c *gin.Context) {
 }
 
 
+func getUserFollowingsById(c *gin.Context) {
+	
+	var uuid string = c.Param("uuid")
+	
+	uuid_, err := strconv.Atoi( uuid )
+
+	if err != nil {
+		c.JSON(http.StatusOK, MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		return
+	}
+
+	
+	var followers []int = getFollowings(uuid_)
+	
+	c.JSON(http.StatusOK, MakeServerResponse(200, followers))
+}
+
 func getUserFollowersById(c *gin.Context) {
 	
 	var uuid string = c.Param("uuid")
@@ -427,9 +470,12 @@ func getUserFollowersById(c *gin.Context) {
 		c.JSON(http.StatusOK, MakeServerResponse(400, "bad request, make sure post_id is an integer"))
 		return
 	}
-	var followers []AUser = getFollowers( uuid_ );
+
+	var followers []int = getFollowers(uuid_)
+	
 	c.JSON(http.StatusOK, MakeServerResponse(200, followers))
 }
+
 
 func followRoute(c *gin.Context) {
 	//  Gets the follower_id and the one that wants to be added.
@@ -443,9 +489,8 @@ func followRoute(c *gin.Context) {
 	}
 
 	// type  struct {
-	// 	Id_        		int `json:"id_"`
 	// 	Follower_id		int `json:"follower_id"`
-	// 	Followed_id		int `json:"follower_id"`
+	// 	Followed_id		int `json:"followed_id"`
 	// 	UToken			string `json:"token"`
 	// }
 
@@ -466,7 +511,6 @@ func followRoute(c *gin.Context) {
 
 	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
 
-
 	// notImplemented(c);
 }
 
@@ -481,7 +525,6 @@ func unfollowRoute(c *gin.Context) {
 	}
 
 	// type  struct {
-	// 	Id_        		int `json:"id_"`
 	// 	Follower_id		int `json:"follower_id"`
 	// 	Followed_id		int `json:"follower_id"`
 	// 	UToken			string `json:"token"`
@@ -499,15 +542,14 @@ func unfollowRoute(c *gin.Context) {
 		}
 		
 		c.JSON(http.StatusOK, MakeServerResponse(500, result.Text))
+		
 		return
 	}
 
 	c.JSON(http.StatusOK, MakeServerResponse(401, "The token sent is not valid!"))
-
-	notImplemented(c);
+	// notImplemented(c);
 }
 
 func notImplemented(c *gin.Context) {
 	c.JSON(http.StatusOK, MakeServerResponse(100, "Not implemented!"))	
 }
-

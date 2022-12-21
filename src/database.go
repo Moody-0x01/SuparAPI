@@ -13,7 +13,7 @@ var dataBase *sql.DB
 func initializeDb() (error, string) {
 	
 	var err error
-	var dbPath string = "./db/Users.db?cache=shared&mode=rwc"
+	var dbPath string = "./db/Users.db"
 
 	dataBase, err = sql.Open("sqlite3", dbPath); if err != nil {
 		return err, ""
@@ -217,42 +217,102 @@ func getUserByToken(Token string) (User, error) {
 }
 
 
-func getUsers() []AUser {
+func getUsers(uuid interface{}) []AUser {
 	var Users []AUser
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
-	defer row.Close()
-	if err != nil {
-		fmt.Println(err)
-		return Users
-	}
+	switch uuid.(type) {
+		case int:
+			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			defer row.Close()
+			
+			if err != nil {
+				fmt.Println(err)
+				return Users
+			}
 
-	var temp AUser
+			var temp AUser
 
-	for row.Next() {
-		
-		row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-		Users = append(Users, temp)
+			for row.Next() {
+				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				temp.IsFollowed = isFollowing(temp.Id_, uuid.(int))
+				Users = append(Users, temp)
+			}
+
+			break
+
+		case bool:
+
+			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			defer row.Close()
+			
+			if err != nil {
+				fmt.Println(err)
+				return Users
+			}
+
+			var temp AUser
+
+			for row.Next() {
+				
+				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				Users = append(Users, temp)
+			}
+
+			break
+
+		default:
+			return Users
+			break
 	}
+	
 
 	return Users	
 }
 
-func getUsersByQuery(Q string) []AUser {
+func getUsersByQuery(Q string, uuid interface{}) []AUser {
 	var Users []AUser
 	var NewQ string = "%" + Q + "%"
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
-	defer row.Close()
+	switch uuid.(type) {
+		case int:
+			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
-	if err != nil {
-		fmt.Println(err)
-		return Users
-	}
+			defer row.Close()
 
-	for row.Next() {
-		var temp AUser
-		row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-		Users = append(Users, temp)	
+			if err != nil {
+				fmt.Println(err)
+				return Users
+			}
+
+			for row.Next() {
+				var temp AUser
+				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				temp.IsFollowed = isFollowing(temp.Id_, int(uuid.(int)))
+				Users = append(Users, temp)	
+			}
+
+			break
+
+		case bool:
+			
+			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
+
+			defer row.Close()
+
+			if err != nil {
+				fmt.Println(err)
+				return Users
+			}
+
+			for row.Next() {
+				var temp AUser
+				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				Users = append(Users, temp)	
+			}
+
+			break
+
+		default:
+			return Users		
 	}
 
 	return Users
@@ -726,11 +786,46 @@ func unfollow(follower_id int, followed_id int, Token string) Result {
 // 	// Add Later.
 // }
 
-func getFollowers(followed int) []AUser {
+func getFollowers(followed int) []int {
 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
-	var followers []AUser;
+	// people who is following followed.
+	var followers []int;
 
-	row, err := dataBase.Query("SELECT follower_id FROM LIKES WHERE followed_id=? ORDER BY ID DESC", followed)
+	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
+	
+	//  CREATE TABLE FOLLOWERS (
+ 	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+ 	//        followed_id INTEGER
+ 	//        follower_id INTEGER
+	// );
+
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println("ERROR: \n", err)
+		return followers
+	}
+
+	var uuid int
+	var index = 0;
+	
+	for row.Next() {
+		row.Scan(&uuid)
+		fmt.Println("follower", index, uuid)
+		followers = append(followers, uuid)
+		index++
+	}
+
+	return followers
+}
+
+
+func getFollowings(following int) []int {
+	// people who followed is followingg..
+
+	var followers []int;
+
+	row, err := dataBase.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
 	
 	defer row.Close()
 
@@ -740,14 +835,41 @@ func getFollowers(followed int) []AUser {
 	}
 
 	var uuid int
-	var temp AUser
 
 	for row.Next() {
 		row.Scan(&uuid)
-		temp = getUserById(uuid)
-		followers = append(followers, temp)
+		followers = append(followers, uuid)
 	}
 
-
 	return followers
+}
+
+
+func isFollowing(followed int, follower int) bool {
+	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
+	// people who followed is followingg..
+
+	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
+	
+	//  CREATE TABLE FOLLOWERS (
+ 	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+ 	//        followed_id INTEGER
+ 	//        follower_id INTEGER
+	// );
+
+	defer row.Close()
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	var follower_id int;
+
+	for row.Next() {
+		row.Scan(&follower_id)
+		fmt.Println(follower_id)
+	}
+
+	return !(follower_id == 0)
 }
