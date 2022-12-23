@@ -1,11 +1,26 @@
 package main
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"github.com/gorilla/websocket"
+)
 // Default fields for the user object.
 const DefaultUserImg string = "/img/defUser.jpg"
 const DefaultUserBg string = "/img/defBg.jpg"
 const DefaultUserBio string = "Wait for it to load :)"
 const DefaultUserAddress string = "Everywhere"
 
+
+type Notification struct {
+	Id_ int	`json:"id"`
+	Text string	`json:"text"`
+	Type string	`json:"type"`
+	Date string	`json:"date"`
+	Uuid int	`json:"uuid"`
+	Actorid int	`json:"actorid"`
+	Seen bool	`json:"seen"`
+	Post_id int	`json:"post_id"`
+}
 
 type User struct {
 	Id_ 		 int `json:"id_"`
@@ -19,7 +34,6 @@ type User struct {
 	Address		 string `json:"addr"`
 }
 
-
 // type Notification struct {
 //     TYPE TEXT DEFAULT null, [follow | like | comment | ...]
 //     USER_ID INTEGER,
@@ -27,7 +41,6 @@ type User struct {
 //     PID INTEGER,
 //     MSG TEXT DEFAULT null
 //     ...
-
 // }
 
 type AUser struct {
@@ -149,8 +162,7 @@ type Query struct {
 type TokenizedPost struct {
 	PostID int `json:"id_"`
 	Token string `json:"token"`
-	Uuid  int `json:"uuid"`
-	
+	Uuid  int `json:"uuid"`	
 	Text  string `json:"text"`
 	Img   string `json:"img"`
 }
@@ -250,4 +262,70 @@ func MakeServerResult(ok bool, t string) Result {
 	e.Ok = ok
 	e.Text = t
 	return e
+}
+/* ----Sockets---- */
+
+type client struct {
+	Addr string
+	Uuid int
+	Conn *websocket.Conn
+	IsOpen bool
+}
+
+func newClient(Addr string, Uuid int, Conn *websocket.Conn, IsOpen bool) {
+	var New client
+	New.Addr = Addr
+	New.Uuid = Uuid
+	New.Conn = Conn
+	New.IsOpen = IsOpen
+	// Register user by id.
+	
+	socketClients[Uuid] = New
+	
+	fmt.Println("new client with id: ", New.Uuid);
+	fmt.Println("address: ", New.Addr);
+	go New.handleConn()
+}
+
+func (c *client) logClient() {
+	fmt.Println("addr: ", c.Addr)
+	fmt.Println("uuid: ", c.Uuid)
+}
+
+func (c *client) sendMessage(msg string) (err error) {
+	var conn = c.Conn;
+	NewMsg := []byte(msg);
+	err = conn.WriteMessage(websocket.TextMessage, NewMsg)
+	return err
+}
+
+func (c *client) sendJSON(v interface{}) (err error) {
+	var conn = c.Conn;
+	err = conn.WriteJSON(v)
+	return err
+}
+
+func (c *client) handleConn() {
+	
+	for {
+		
+		_, message, err := c.Conn.ReadMessage()
+		
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		defer c.Conn.Close()
+		for id, client_ := range socketClients {
+			if client_ != *c {				
+				var NewMsg string = strconv.Itoa(c.Uuid) + " said: " + string(message)
+				err := client_.sendMessage(NewMsg)
+				if err != nil {
+					fmt.Println("Erorr sending message to user #", id, " :", err)
+				}
+			}
+		}
+	}
+
 }

@@ -74,15 +74,29 @@ func getUsersRoute(c *gin.Context) {
 
 func getUserByIdRoute(c *gin.Context) {
 	
-	var uuid string = c.Param("uuid")
+	var uuid string = GetFieldFromContext(c, "uuid")
+	var user_id string = GetFieldFromContext(c, "user")
+
 	uuid_, err := strconv.Atoi(uuid)
 
 	if err != nil {
-		c.JSON(500, MakeServerResponse(0, "Server error"))
+		c.JSON(500, MakeServerResponse(400, "uuid should be a number"))
 		return 
 	}
 
 	var User AUser = getUserById(uuid_)
+	
+	if(!isEmpty(user_id)) {
+		user_ID, err := strconv.Atoi(user_id)
+
+		if err != nil {
+			c.JSON(500, MakeServerResponse(400, "user get parameter should be a number for this request to successed"))
+			return 
+		}
+
+		User.IsFollowed = isFollowing(User.Id_, user_ID)
+	}
+
 	var res Response = MakeServerResponse(200, User)
 	
 	c.JSON(http.StatusOK, res)
