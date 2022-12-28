@@ -11,7 +11,6 @@ import (
 )
 
 func RequestCancelRecover() gin.HandlerFunc {
-	
 	return func(c *gin.Context) {
 		defer func() {
 			
@@ -31,13 +30,15 @@ func RequestCancelRecover() gin.HandlerFunc {
 
 func run() {
 	gin.SetMode(gin.ReleaseMode)
-
 	router := gin.Default()
 	router.Use(cors.Default())	
 	router.Use(gin.Logger(), RequestCancelRecover())
 	// HTML/JS/CSS/IMG loaders
+	
 	router.Static("/static", "./public/static")
-	router.Static("/img", "./public/img")	
+	router.Static("/img", "./public/img")
+	router.Static("/Global.css", "./public/Global.css")
+	
 	router.LoadHTMLGlob("public/*.html")
 
 	// POST routes.
@@ -68,11 +69,9 @@ func run() {
 
     // Socket routes.
     router.GET("/v2/NotificationSock", socketOperations.NotificationServer)
-
 	// running the server.
-	fmt.Println("Serving in port :8887")
-	
-	router.Run(":8887")
+	fmt.Println("Serving in port :8888")
+	router.Run(":8888")
 }
 
 func main() {

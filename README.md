@@ -1,5 +1,4 @@
 
-
 # Go Api
 ### Routes
 NOTE: This section will be updated regularily once I add or remove a route.
@@ -76,17 +75,16 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
         follower_id INTEGER
     );
     
-    ;; This for later: 
-        CREATE TABLE NOTIFICATIONS (
-            
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            TYPE TEXT DEFAULT null, [follow | like | comment | ...]
-            USER_ID INTEGER,
-            OTHER_ID INTEGER,
-            PID INTEGER,
-            MSG TEXT DEFAULT null
-            ...
-        )
+    CREATE TABLE NOTIFICATIONS (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Text TEXT,
+        TYPE INTEGER,
+        UUID INTEGER,
+        ACTORID INTEGER,
+        Seen INTEGER,
+        Post_id INTEGER,
+        Link TEXT
+    )
 
     
 ```

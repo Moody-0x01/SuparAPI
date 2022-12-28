@@ -12,7 +12,6 @@ import (
 var dataBase *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
-
 func InitializeDb() (error, string) {
 	
 	var err error
@@ -26,7 +25,6 @@ func InitializeDb() (error, string) {
 }
 
 func isEmpty(s string) bool { return len(s) == 0 }
-
 
 func AuthenticateUserJWT(UserJWT string) models.Response {
    
@@ -80,6 +78,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 
 	return models.MakeServerResponse(401, "Not authorized!")	
 }
+
 func GetAllPosts() []models.Post {
 	var Posts []models.Post
 
@@ -362,7 +361,6 @@ func GetUserIdByToken(t string) (int, bool) {
 	return id, true
 }
 
-
 func CheckUser(Email string) bool {
 		
 	row, err := dataBase.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
@@ -572,19 +570,18 @@ func AddPost(Text string, Img string, uuid int) models.Result {
 	return models.MakeServerResult(true, "success!")
 }
 
-// TODO Add comment feeature.
-
-// TODO Add likes feature.
-// TODO Add FOLLOW/UNFOLLOW feature.
 
 func Add_comment(uuid int, commentText string, PostId int, Token string) models.Result {
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
     // uuid INTEGER,
     // post_id integer,
     // comment_text TEXT
-    
-    id, ok := GetUserIdByToken(Token)
+    // TODO: add new id that specifies which user owns the post u liked or comminted on.
+
+    id, ok := GetUserIdByToken(Token);
+
     if ok {
+
     	if id == uuid {
     		stmt, _ := dataBase.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
 			_, err := stmt.Exec(uuid, PostId, commentText)
@@ -718,16 +715,43 @@ func Get_likes(PostId int) []models.Like {
 	return likes
 }
 
-// GET Followers. by id.
-// Add follower.
-// 
-// for fetch posts
 
-// TODO Add follower, Notification+++
+func addNotification(models.Notification) bool {
+	// CREATE TABLE NOTIFICATIONS (
+	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+	//        Text TEXT,
+	//        TYPE INTEGER,
+	//        UUID INTEGER,
+	//        ACTORID INTEGER,
+	//        Seen INTEGER,
+	//        Post_id INTEGER,
+	//        Link TEXT
+	// )
+	//TODO:: 
+
+
+}
+
+func pushNotification(models.Notification) bool {
+	//TODO add a push notification mechanism.
+}
+
+
 func Follow(follower_id int, followed_id int, Token string) models.Result {
 	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
-	id, ok := GetUserIdByToken(Token)
+	
+	client, ok := models.socketClients[followed_id];
 
+    if ok {
+    	fmt.Println("User is online we can push the notification!")
+    	fmt.Println("client: ")
+    	fmt.Println(client)
+    } else {
+    	fmt.Println("User is OFFLINE..!")
+    }
+
+	id, ok := GetUserIdByToken(Token)
+	
 	if ok {
 		if id == follower_id {
 			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")

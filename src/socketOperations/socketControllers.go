@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/Moody0101-X/Go_Api/models"
-	// "github.com/Moody0101-X/Go_Api/main"
+
 )
 
 
@@ -38,6 +38,6 @@ func NotificationServer(c *gin.Context) {
 		return 
 	}
 
-	models.NewClient(ws.RemoteAddr().String(), uuid_, ws, true)
+	models.NewClient(ws.RemoteAddr().String(), uuid_, ws, true);
 }
 
