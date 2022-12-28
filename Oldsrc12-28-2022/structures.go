@@ -117,6 +117,7 @@ type Post struct {
 func (U *User) setDefaults() {
 	//TODO Setting the default fields to add to the db if some are not present.
 	
+	
 	/*
 		THOSE ARE THE FIELDS TO BE CHANGED if they were not set.
 			Img 		 string `json:"img"`

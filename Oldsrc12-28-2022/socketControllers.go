@@ -23,6 +23,7 @@ var upgrader = websocket.Upgrader{
 
 
 func NotificationServer(c *gin.Context) {
+	
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println(err)

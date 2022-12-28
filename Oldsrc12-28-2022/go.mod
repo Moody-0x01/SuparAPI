@@ -1,4 +1,4 @@
-module github.com/Moody0101-X/Go_Api
+module API
 
 go 1.18
 

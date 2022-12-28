@@ -1,6 +1,7 @@
 TODO for the go api:
 	
 	- WEB API -
+	
 	[*] [0] -> "/signup"
 	[*] [1] -> "/login"
 	[*] [2] -> "/UpdateUserImage"
@@ -35,8 +36,13 @@ TODO for the go api:
 			note: submitting a liked flag with a string will be prohibited so it is not going to break or anything.
 
 	[*] [13] -> add comments (I have no idea how to do this now!)
-	[ ] [14] -> add following mechanism
-		
+	[*] [14] -> add following mechanism
+	[ ] [15] -> add push notification support
+		[ ] add db table.
+		[ ] add generic getters and inserters.
+		NOTES: The data will be distrubuted to the db, then to the socket enpoint to push a notification to the user. if he is online.
+		[ ] add a socket 
+
 	- APPLICATION LAYER API -
 	[*] [0] MakeServerResponse
 	[*] [1] getUserByAT
@@ -46,4 +52,8 @@ TODO for the go api:
 	[*] [5] verifyUserPassword
 	[*] [6] getPostsById
 	[*] [7] GetUserByAccessToken :)
-	
+
+
+
+
+
