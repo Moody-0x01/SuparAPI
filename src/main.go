@@ -69,6 +69,7 @@ func run() {
 
     // Socket routes.
     router.GET("/v2/NotificationSock", socketOperations.NotificationServer)
+	
 	// running the server.
 	fmt.Println("Serving in port :8888")
 	router.Run(":8888")

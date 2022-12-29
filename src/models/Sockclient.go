@@ -1,6 +1,12 @@
 package models;
 
-var socketClients = make(map[int]client)
+import (
+	"fmt"
+	"github.com/gorilla/websocket"
+	"strconv"
+)
+
+var SocketClients = make(map[int]client)
 
 type client struct {
 	Addr string
@@ -17,9 +23,8 @@ func NewClient(Addr string, Uuid int, Conn *websocket.Conn, IsOpen bool) {
 	New.Conn = Conn
 	New.IsOpen = IsOpen
 	// Register user by id.
-	socketClients[Uuid] = New
-	fmt.Println("new client with id: ", New.Uuid);
-	fmt.Println("address: ", New.Addr);
+	SocketClients[Uuid] = New
+	New.logClient()
 	go New.handleConn()
 }
 
@@ -35,7 +40,7 @@ func (c *client) sendMessage(msg string) (err error) {
 	return err
 }
 
-func (c *client) sendJSON(v interface{}) (err error) {
+func (c *client) SendJSON(v interface{}) (err error) {
 	var conn = c.Conn;
 	err = conn.WriteJSON(v)
 	return err
@@ -50,15 +55,15 @@ func (c *client) handleConn() {
 			break
 		}
 
-		defer c.Conn.Close()
-
 		BroadCast(message, c); // Broadcasting a message to every person that is subsribed to our notification socket pool.
 	}
 }
 
 
-func BroadCast(msg []byte, c client)  {
-	for id, client_ := range socketClients {
+func BroadCast(msg []byte, c *client)  {
+	defer c.Conn.Close();
+
+	for id, client_ := range SocketClients {
 		if client_ != *c {				
 			var NewMsg string = strconv.Itoa(c.Uuid) + " said: " + string(msg)
 			

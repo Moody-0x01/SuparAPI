@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/Moody0101-X/Go_Api/models"
-	"github.com/Moody0101-X/Go_Api/database"
-	"github.com/Moody0101-X/Go_Api/crypto"
 )
 
 func isEmpty(s string) bool { return len(s) == 0 }

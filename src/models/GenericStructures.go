@@ -2,8 +2,6 @@ package models
 
 import (
 	"fmt"
-	"strconv"
-	"github.com/gorilla/websocket"
 )
 
 func isEmpty(s string) bool { return len(s) == 0 }
