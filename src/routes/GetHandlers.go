@@ -1,6 +1,5 @@
 package routes;
 
-
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
@@ -8,7 +7,6 @@ import (
 	"github.com/Moody0101-X/Go_Api/models"
 	"github.com/Moody0101-X/Go_Api/database"
 )
-
 
 func GetAllPostsRoute(c *gin.Context) {
 	All := database.GetAllPosts()
@@ -29,7 +27,6 @@ func GetUserPostsRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, UserPosts))
 
 }
-
 
 func GetUsersRoute(c *gin.Context) {
 	var q string = GetFieldFromContext(c, "q")
@@ -166,9 +163,17 @@ func GetUserFollowersById(c *gin.Context) {
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
 }
 
+func GetAllNotificationsRoute(c *gin.Context) {
 
+	var uuid string = c.Param("uuid")
+	uuid_, err := strconv.Atoi( uuid )
 
+	if err != nil {
+		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		return
+	}
 
+	var Notifications []models.Notification = database.GetAllNotifications(uuid_)
 
-
-
+	c.JSON(http.StatusOK, models.MakeServerResponse(200, Notifications))
+}

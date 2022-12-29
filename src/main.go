@@ -62,7 +62,7 @@ func run() {
 	router.GET("/v2/getFollowings/:uuid", routes.GetUserFollowingsById)
 	router.GET("/v2/getComments/:pid", routes.GetPostComments)
 	router.GET("/v2/getLikes/:pid", routes.GetPostLikes)
-	
+	router.GET("/v2/getUserNotifications/:uuid", routes.GetAllNotificationsRoute)
 	// router.Static("/", "./public")
 	router.GET("/", routes.Index)
     router.NoRoute(routes.Index)

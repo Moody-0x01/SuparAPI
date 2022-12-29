@@ -39,7 +39,6 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, resp);
 }
 
-
 func SignUp(c *gin.Context) {
 	
 	var newUser models.User	
@@ -207,7 +206,6 @@ func DeletePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.MakeServerResponse(500, "invalid access token. try with a valid token."))
 }
-
 
 func AddCommentRoute(c *gin.Context) {
 	/*  Excpects: 
