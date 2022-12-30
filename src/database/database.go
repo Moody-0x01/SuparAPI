@@ -4,7 +4,6 @@ import (
 	// "fmt"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/Moody0101-X/Go_Api/models"
 )
 
 var dataBase *sql.DB

@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/Moody0101-X/Go_Api/models"
-
 )
 
 
@@ -24,6 +23,7 @@ var upgrader = websocket.Upgrader{
 func NotificationServer(c *gin.Context) {
 	
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -40,4 +40,3 @@ func NotificationServer(c *gin.Context) {
 
 	models.NewClient(ws.RemoteAddr().String(), uuid_, ws, true);
 }
-

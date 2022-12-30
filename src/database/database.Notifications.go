@@ -26,7 +26,7 @@ func GetAllNotifications(uuid int) []models.Notification {
 		Nots = append(Nots, temp)
 	}
 
-	return Notes;
+	return Nots;
 }
 
 func AddNewNotification(Entry models.Notification) {
@@ -42,22 +42,24 @@ func AddNewNotification(Entry models.Notification) {
 
 func SetSeenForNotification(uuid int)  {
 	// TODO: set Seen to true (1)
-	
+
 }
 
 func pushNotificationForUser(NotificaionObject models.Notification, suffixTxt string) {
 	// TODO: Look for the connection in the online clients object. done
 	// TODO: send the Notification if the user is connected. done
 	// TODO: add the notification to db...
-	
+
 	client, ok := models.SocketClients[NotificaionObject.Uuid];
+
+	fmt.Println("NOTE OBJECT: ", NotificaionObject)
 
     if ok {
 		NotificaionObject.User_ = GetUserById(NotificaionObject.Actorid);
-		Notification.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
+		NotificaionObject.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
     	client.SendJSON(NotificaionObject)
     } else {
-    	fmt.Println("User is OFFLINE..!")
+    	fmt.Println("User is OFFLINE..!", "ID: ", NotificaionObject.Uuid)
     }
 
     AddNewNotification(NotificaionObject);

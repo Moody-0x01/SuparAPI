@@ -20,7 +20,7 @@ func Follow(follower_id int, followed_id int, Token string) models.Result {
 				return models.MakeServerResult(false, "could not follow..")
 			}
 			
-	    	Notification := models.NewNot(NotText, models.FOLLOW, followed_id, follower_id);
+	    	Notification := models.NewNot(models.FOLLOW, followed_id, follower_id);
 	    	pushNotificationForUser(Notification, " followed you!")
 			return models.MakeServerResult(true, "success")
 		}
@@ -54,10 +54,6 @@ func Unfollow(follower_id int, followed_id int, Token string) models.Result {
 
 	return models.MakeServerResult(false, "coult not get user id.")
 }
-
-// func pushNotification() {
-// 	// Add Later.
-// }
 
 func GetFollowers(followed int) []int {
 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"

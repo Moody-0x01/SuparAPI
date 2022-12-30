@@ -58,6 +58,7 @@ func GetAllPosts() []models.Post {
 	// fmt.Println(Posts)
 	return Posts
 }
+
 func GetPostOwnerId(PostID int) (int, bool) {
 	var id int
 	row, err := dataBase.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
@@ -123,7 +124,7 @@ func AddPost(Text string, Img string, uuid int) models.Result {
 }
 
 
-func Add_comment(uuid int, commentText string, PostId int, Token string) models.Result {
+func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwnerId int) models.Result {
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
     // uuid INTEGER,
     // post_id integer,
@@ -142,6 +143,9 @@ func Add_comment(uuid int, commentText string, PostId int, Token string) models.
 				fmt.Println("ERR: ", err)
 				return models.MakeServerResult(false, "could not add comment to db.")
 			}
+			
+			Notification := models.NewNot(models.COMMENT, PostOwnerId, uuid);
+	    	pushNotificationForUser(Notification, " commented on your post!")
 
 			return models.MakeServerResult(true, "success")
     	}	
@@ -154,7 +158,7 @@ func Add_comment(uuid int, commentText string, PostId int, Token string) models.
 	
 }
 
-func Add_like(uuid int, PostId int, Token string) models.Result {
+func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result {
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
 	// uuid INTEGER,
 	// post_id INTEGER
@@ -170,6 +174,9 @@ func Add_like(uuid int, PostId int, Token string) models.Result {
 				fmt.Println("ERR: ", err)
 				return models.MakeServerResult(false, "could not add like to db.")
 			}
+			
+			var Notification models.Notification = models.NewNot(models.LIKE, PostOwnerId, uuid);
+	    	pushNotificationForUser(Notification, " liked your post!")
 
 			return models.MakeServerResult(true, "success")	
 		}
@@ -241,8 +248,8 @@ func Get_comments(PostId int) []models.Comment {
 func Get_likes(PostId int) []models.Like {
 
 	/* 
-	map[string]&websocket.conn
-	map[uuid]&w
+		map[string]&websocket.conn
+		map[uuid]&w
 	*/
 
 	var likes []models.Like

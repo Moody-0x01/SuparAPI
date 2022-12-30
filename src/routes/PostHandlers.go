@@ -229,7 +229,7 @@ func AddCommentRoute(c *gin.Context) {
 
 	if Ok {
 		// passing the other data to add the comment.
-		result := database.Add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken)
+		result := database.Add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken, CommentRoutePostedData.Post_owner_id)
 		
 		if result.Ok {
 			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Text))
@@ -264,7 +264,9 @@ func AddLikeRoute(c *gin.Context) {
 
 	if Ok {
 		// passing the other data to add the Like.
-		result := database.Add_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
+		fmt.Println("uuid that was parsed: ", LikeRoutePostedData.Post_owner_id);
+
+		result := database.Add_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken, LikeRoutePostedData.Post_owner_id)
 		
 		if result.Ok {
 			var data models.Like;

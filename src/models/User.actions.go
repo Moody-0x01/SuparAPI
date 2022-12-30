@@ -41,12 +41,14 @@ type TokenizedComment struct {
 	Uuid		 int `json:"uuid"`
 	Text		 string `json:"text"`
 	Token        string `json:"token"`
+	Post_owner_id	 int `json:"post_owner_id"`
 }
 
 type TokenizedLike struct {
 	Post_id		 int `json:"post_id"`
 	Uuid		 int `json:"uuid"`
 	Token        string `json:"token"`
+	Post_owner_id	 int `json:"post_owner_id"`
 }
 
 type UserLogin struct {
