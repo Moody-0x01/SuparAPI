@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/Moody0101-X/Go_Api/models"
+	"github.com/Moody0101-X/Go_Api/database"
 )
 
 
@@ -38,5 +39,10 @@ func NotificationServer(c *gin.Context) {
 		return 
 	}
 
-	models.NewClient(ws.RemoteAddr().String(), uuid_, ws, true);
+	client, ok := models.NewClient(ws.RemoteAddr().String(), uuid_, ws);
+	if(ok) {
+		go database.HandleConnextionForNotifications(client);	
+	} else {
+		fmt.Println("Could not register client with uuid: ", uuid_);
+	}
 }

@@ -39,6 +39,7 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case []Post:
 			Resp.Data = data.([]Post)
 			break
+		
 		case []Like:
 			Resp.Data = data.([]Like)
 			break
@@ -54,8 +55,13 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case []AUser:
 			Resp.Data = data.([]AUser)
 			break
+		
 		case []int:
 			Resp.Data = data.([]int)
+			break
+
+		case []Notification:
+			Resp.Data = data.([]Notification)
 			break
 
 		case int:

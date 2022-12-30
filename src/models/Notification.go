@@ -12,7 +12,8 @@
 
 */
 package models;
-// import "fmt"
+import "fmt"
+
 type Notification struct {
 	Id_       int      `json:"id"`
 	Text      string   `json:"text"`
@@ -23,7 +24,16 @@ type Notification struct {
 	Post_id   int      `json:"post_id"`
 	Link      string   `json:"link"`
 	User_     AUser    `json:"User"`
+}
 
+type NotificationSeenFlag struct {
+	Id_  int `json:"id"`
+	Uuid int `json:"uuid"`
+}
+
+func (n *NotificationSeenFlag) LogSeen() {
+	fmt.Println("id: ", n.Id_)
+	fmt.Println("uuid: ", n.Uuid)
 }
 
 func NewNot(t int, uuid int, actorid int) Notification {

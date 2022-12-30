@@ -17,7 +17,7 @@ func GetAllPostsRoute(c *gin.Context) {
 func GetUserPostsRoute(c *gin.Context) {
 	var id string = GetFieldFromContext(c, "id_")
 	id_, err := strconv.Atoi(id)
-	
+
 	if err != nil {
 		c.JSON(500, models.MakeServerResponse(0, "Server error"))
 		return 

@@ -8,6 +8,7 @@ import (
 	"github.com/Moody0101-X/Go_Api/socketOperations"
 	"github.com/Moody0101-X/Go_Api/routes"
 	"github.com/Moody0101-X/Go_Api/database"
+	"github.com/Moody0101-X/Go_Api/models"
 )
 
 func RequestCancelRecover() gin.HandlerFunc {
@@ -29,6 +30,8 @@ func RequestCancelRecover() gin.HandlerFunc {
 }
 
 func run() {
+	// GET THE PORT :)
+	var PORT string = models.GetEnv("PORT")
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(cors.Default())	
@@ -71,13 +74,13 @@ func run() {
     router.GET("/v2/NotificationSock", socketOperations.NotificationServer)
 	
 	// running the server.
-	fmt.Println("Serving in port :8888")
-	router.Run(":8888")
+	fmt.Println("Serving in port ", PORT)
+	router.Run(PORT)
 }
 
 func main() {
 	err, path := database.InitializeDb();
-	
+
 	if err != nil {
         fmt.Println("Error opening the database! ", err.Error())
         return
