@@ -26,7 +26,7 @@ func Login(c *gin.Context) {
 				resp = models.MakeServerResponse(200, user)
 			} else {
 
-				resp = models.MakeServerResponse(500, err.Text)
+				resp = models.MakeServerResponse(500, err.Data)
 				fmt.Println("", resp.Data)
 			}
 
@@ -156,7 +156,7 @@ func NewPost(c *gin.Context) {
 		err := database.AddPost(post.Text, post.Img, post.Uuid)
 
 		if err.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, "success, added."))
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, err.Data))
 			return
 		}
 
@@ -232,11 +232,11 @@ func AddCommentRoute(c *gin.Context) {
 		result := database.Add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken, CommentRoutePostedData.Post_owner_id)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Text))
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Text))
+		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
 		return
 	}
 
@@ -279,7 +279,7 @@ func AddLikeRoute(c *gin.Context) {
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Text))
+		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
 		return
 	}
 
@@ -303,11 +303,11 @@ func RemoveLikeRoute(c *gin.Context) {
 		result := database.Remove_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Text))
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Text))
+		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
 		return
 	}
 
@@ -339,11 +339,11 @@ func FollowRoute(c *gin.Context) {
 		result := database.Follow(UData.Follower_id, UData.Followed_id, AccessToken)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Text))
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Text))
+		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
 		return
 	}
 
@@ -375,11 +375,11 @@ func UnfollowRoute(c *gin.Context) {
 		result := database.Unfollow(UData.Follower_id, UData.Followed_id, AccessToken)
 
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Text))
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Text))
+		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
 		
 		return
 	}

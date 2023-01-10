@@ -163,6 +163,21 @@ func GetUserFollowersById(c *gin.Context) {
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
 }
 
+func GetPostByPostidRoute(c *gin.Context) {
+	var pid string = c.Param("pid")
+	
+	pid_, err := strconv.Atoi(pid)
+
+	if err != nil {
+		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an pid"))
+		return
+	}
+	
+	var Post_ models.Post = database.GetPostById(pid_)
+	
+	c.JSON(http.StatusOK, models.MakeServerResponse(200, Post_))
+}
+
 func GetAllNotificationsRoute(c *gin.Context) {
 
 	var uuid string = c.Param("uuid")

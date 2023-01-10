@@ -4,9 +4,17 @@ import (
 	// "fmt"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	// "sync"
 )
 
+// struct DB type {
+// 	sync.RWMutex
+// 	dataBase *sql.DB
+// }
+
+
 var dataBase *sql.DB
+
 // db initializer: Opens the db, then evluates a global conn variable.
 func InitializeDb() (error, string) {
 	

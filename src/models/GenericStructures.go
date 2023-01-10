@@ -14,11 +14,9 @@ type Post struct {
 	User_ AUser   `json:"user"` 
 }
 
-
-
 type Result struct {
 	Ok   bool `json:"ok"`
-	Text string `json:"text"`
+	Data interface{} `json:"data"`
 }
 
 type Query struct {
@@ -28,6 +26,47 @@ type Query struct {
 type Response struct {
 	Code int `json:"code"`
  	Data interface{} `json:"data"`
+}
+
+
+type SocketMessage struct {
+	Code   int    `json:"code"`
+	Action string `json:"action"`
+	Data   interface{} `json:"data"`
+}
+
+
+func MakeSocketResp(Action string, code int, data interface{}) SocketMessage {
+	
+	var resp SocketMessage;
+	resp.Code = code;
+	resp.Action = Action;
+	
+	switch data.(type) {
+		
+		case Notification:
+			resp.Data = data.(Notification)
+			break
+		
+		case Like:
+			resp.Data = data.(Like)
+			break
+		
+		case Comment:
+			resp.Data = data.(Comment)
+			break
+		
+		case Post:
+			resp.Data = data.(Post)
+			break
+
+		default:
+			resp.Data = data
+			break
+
+	}
+
+	return resp;
 }
 
 func MakeServerResponse(code int, data interface{}) Response {
@@ -92,7 +131,6 @@ func MakeServerResponse(code int, data interface{}) Response {
 			Resp.Data = data.(UserLogin)
 			break
 
-
 		default:
 			fmt.Println("Unexpected data type. make sure it is added in MakeServerResponse(code int, data interface{}){ }")
 			break
@@ -101,9 +139,18 @@ func MakeServerResponse(code int, data interface{}) Response {
 	return Resp
 }
 
-func MakeServerResult(ok bool, t string) Result {
+func MakeServerResult(ok bool, t interface{}) Result {
 	var e Result
 	e.Ok = ok
-	e.Text = t
+	
+	switch t.(type) {
+		case int:
+			e.Data = t.(int)
+			break
+		default:
+			e.Data = t.(string)
+			break
+	}
+
 	return e
 }

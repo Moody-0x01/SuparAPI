@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func NotificationServer(c *gin.Context) {
+func MainSocketHandler(c *gin.Context) {
 	
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	
@@ -39,9 +39,10 @@ func NotificationServer(c *gin.Context) {
 		return 
 	}
 
-	client, ok := models.NewClient(ws.RemoteAddr().String(), uuid_, ws);
+	client, ok := models.ClientPool.AddClient(ws.RemoteAddr().String(), uuid_, ws);
+
 	if(ok) {
-		go database.HandleConnextionForNotifications(client);	
+		go database.HandleClientConnection(client);
 	} else {
 		fmt.Println("Could not register client with uuid: ", uuid_);
 	}

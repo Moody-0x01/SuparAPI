@@ -32,6 +32,8 @@ func RequestCancelRecover() gin.HandlerFunc {
 func run() {
 	// GET THE PORT :)
 	var PORT string = models.GetEnv("PORT")
+	var CDN string = models.GetEnv("CDN_HOST")
+
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(cors.Default())	
@@ -59,26 +61,31 @@ func run() {
 	// Get routes.
 	router.GET("/v2/getUserPosts", routes.GetUserPostsRoute) // gettting user post by id
 	router.GET("/v2/GetAllPosts", routes.GetAllPostsRoute) // getting all posts
+	router.GET("/v2/getPostById/:pid", routes.GetPostByPostidRoute)
+	router.GET("/v2/getPostCommentsById/:pid", routes.GetPostComments)
+	router.GET("/v2/getPostLikesById/:pid", routes.GetPostLikes)
+
 	router.GET("/v2/query", routes.GetUsersRoute) // user look up by name
 	router.GET("/v2/getUser", routes.GetUserByIdRoute) // get user by id
 	router.GET("/v2/getFollowers/:uuid", routes.GetUserFollowersById)
 	router.GET("/v2/getFollowings/:uuid", routes.GetUserFollowingsById)
-	router.GET("/v2/getComments/:pid", routes.GetPostComments)
-	router.GET("/v2/getLikes/:pid", routes.GetPostLikes)
+	
 	router.GET("/v2/getUserNotifications/:uuid", routes.GetAllNotificationsRoute)
 	// router.Static("/", "./public")
 	router.GET("/", routes.Index)
     router.NoRoute(routes.Index)
 
     // Socket routes.
-    router.GET("/v2/NotificationSock", socketOperations.NotificationServer)
+    router.GET("/v2/WSoc", socketOperations.MainSocketHandler)
 	
 	// running the server.
-	fmt.Println("Serving in port ", PORT)
+	fmt.Println("[!] Serving in port -> ", PORT)
+	fmt.Println("[!] Using cdn ->", CDN)
 	router.Run(PORT)
 }
 
 func main() {
+	
 	err, path := database.InitializeDb();
 
 	if err != nil {
@@ -86,8 +93,7 @@ func main() {
         return
     }
 
-    fmt.Println("connected to db: ", path)
-
+    fmt.Println("[!] connected to database ->", path)
 	run()
 }
 

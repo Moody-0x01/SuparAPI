@@ -2,7 +2,7 @@ package database;
 
 import (
 	"fmt"
-	"io"
+	// "io"
 	"github.com/Moody0101-X/Go_Api/models"
 )
 
@@ -41,52 +41,38 @@ func AddNewNotification(Entry models.Notification) {
 	}
 }
 
-func SetSeenForNotification(uuid int, notificationId_ int) {
+func SetSeenForNotification(id int) {
 	// TODO: set Seen to true (1)
-	stmt, _ := dataBase.Prepare("UPDATE NOTIFICATIONS SET Seen=1 WHERE UUID=? AND ID=?")
+	stmt, _ := dataBase.Prepare("UPDATE NOTIFICATIONS SET Seen=1 WHERE ID=?")
 
-	_, err := stmt.Exec(uuid, notificationId_)
+	_, err := stmt.Exec(id)
+	
 	if err != nil {
-		fmt.Println("db err: ", err)
+		fmt.Println("There was an error while adding the notification seen flag")
+		fmt.Println(err)
 	}
 }
 
 func pushNotificationForUser(NotificaionObject models.Notification, suffixTxt string) {
 	// TODO: add the notification to db... having a prob heree..
+	fmt.Println("Here in the NotificaionObject push func.")
+	if(!(NotificaionObject.Actorid == NotificaionObject.Uuid)) {
+		Client, ok := models.ClientPool.GetClient(NotificaionObject.Uuid);
 
-	Client, ok := models.SocketClients[NotificaionObject.Uuid];
-
-	fmt.Println("NOTE OBJECT: ", NotificaionObject)
-
-    if ok {
-		NotificaionObject.User_ = GetUserById(NotificaionObject.Actorid);
-		NotificaionObject.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
-    	Client.SendJSON(NotificaionObject)
-    }
-
-    AddNewNotification(NotificaionObject);
-}
-
-func HandleConnextionForNotifications(c *models.Client) {
-	for {
-		var seenFlag models.NotificationSeenFlag
-		err := c.Conn.ReadJSON(&seenFlag)
-
-		if err != nil {
-			if err == io.EOF {
-				fmt.Printf("User with id: %s DISCONNECTED.\n", c.Uuid);
-				break;
-			}
-
-			fmt.Println(err);
-
-			continue;
+		if ok {
+			NotificaionObject.User_ = GetUserById(NotificaionObject.Actorid);
+			NotificaionObject.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
+			var resp models.SocketMessage = models.MakeSocketResp(models.NOTIFICATION, 200, NotificaionObject);
+			Client.SendJSON(resp);
+		} else {
+			fmt.Println("Client offline.");
 		}
 
-		seenFlag.LogSeen()
-		
-		// TODO: Save the specified notification new state => seen
-		// TODO: Send the success message.
-		SetSeenForNotification(seenFlag.Uuid, seenFlag.Id_);
+		AddNewNotification(NotificaionObject);
 	}
 }
+
+// type socketResp struct {
+// 	Code int `json:"code"`
+// 	Data interface{} `json:"data"`
+// }

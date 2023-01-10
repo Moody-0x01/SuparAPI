@@ -1,28 +1,12 @@
 
 package models;
 
+
 import (
 	"log"
-	// "github.com/joho/godotenv"
-	// "os"
+	"strings"
+	"io/ioutil"
 )
-
-/*
-
-func LoadDotEnv() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-	    log.Fatalf("Error loading .env file")
-	}
-}
-
-func GetEnv(k string) string {
-	return os.Getenv("PORT")
-}
-
-*/
-
 
 func loadEnv(params ...string) map[string]string {
 	var EnvPath string = "./.env";
@@ -56,3 +40,4 @@ func GetEnv(key string) string {
     EnvMap := loadEnv();
     return EnvMap[key];
 }
+

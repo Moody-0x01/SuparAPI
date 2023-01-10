@@ -20,14 +20,12 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 
 		stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
 
-		result, err := stmt.Exec(PostId) // Execute query.
+		_, err := stmt.Exec(PostId) // Execute query.
 
 
 		if err != nil {
 			return models.MakeServerResponse(500, "Could not delete the post.")
 		}
-
-		fmt.Println("", result);
 
 		return models.MakeServerResponse(200, "success")
 	}
@@ -75,6 +73,8 @@ func GetPostOwnerId(PostID int) (int, bool) {
 	return id, true
 }
 
+
+
 func GetUserPostById(id int) []models.Post {
 	// A functions to use 
 	var Posts []models.Post
@@ -98,11 +98,32 @@ func GetUserPostById(id int) []models.Post {
 }
 
 
-func AddPost(Text string, Img string, uuid int) models.Result {
+func GetPostById(Post_id int) models.Post {
+	
+	row, err := dataBase.Query("SELECT ID, Text, IMG, USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
+	
+	defer row.Close()
+	
+	var PostOB models.Post;
+	
+	if err != nil {
+		fmt.Println(err)
+		return PostOB
+	}
+
+	for row.Next() {
+		row.Scan(&PostOB.Id_, &PostOB.Text, &PostOB.Img, &PostOB.Uid_);
+		PostOB.User_ = GetUserById(PostOB.Uid_)
+	}
+
+	return PostOB
+}
+
+func AddPost(Text string, Img string, uuid int) (models.Result) {
+
+	var pid int = GetNextUID("Posts")
 
 	if !isEmpty(Img) {
-		var pid int = GetNextUID("Posts")
-		
 		var ok bool;
 		
 		ok, Img = cdn.AddPostImage(uuid, Img, pid) // (bool, string)
@@ -120,7 +141,7 @@ func AddPost(Text string, Img string, uuid int) models.Result {
 		return models.MakeServerResult(false, "could not add post. err L489")
 	}
 
-	return models.MakeServerResult(true, "success!")
+	return models.MakeServerResult(true, pid)
 }
 
 
@@ -145,6 +166,7 @@ func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwn
 			}
 			
 			Notification := models.NewNot(models.COMMENT, PostOwnerId, uuid);
+			Notification.Post_id = PostId;
 	    	pushNotificationForUser(Notification, " commented on your post!")
 
 			return models.MakeServerResult(true, "success")
@@ -176,8 +198,9 @@ func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result
 			}
 			
 			var Notification models.Notification = models.NewNot(models.LIKE, PostOwnerId, uuid);
+			Notification.Post_id = PostId;
 	    	pushNotificationForUser(Notification, " liked your post!")
-
+	    	fmt.Println("Notification was pushed..")
 			return models.MakeServerResult(true, "success")	
 		}
 
@@ -273,20 +296,3 @@ func Get_likes(PostId int) []models.Like {
 
 	return likes
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
