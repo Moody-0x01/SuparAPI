@@ -131,6 +131,10 @@ func MakeServerResponse(code int, data interface{}) Response {
 			Resp.Data = data.(UserLogin)
 			break
 
+		case string:
+			Resp.Data = data.(string)
+			break
+			
 		default:
 			fmt.Println("Unexpected data type. make sure it is added in MakeServerResponse(code int, data interface{}){ }")
 			break

@@ -153,10 +153,10 @@ func NewPost(c *gin.Context) {
 
 
 	if Ok {
-		err := database.AddPost(post.Text, post.Img, post.Uuid)
+		result := database.AddPost(post.Text, post.Img, post.Uuid)
 
-		if err.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, err.Data))
+		if result.Ok {
+			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
 
