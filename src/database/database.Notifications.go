@@ -56,20 +56,24 @@ func SetSeenForNotification(id int) {
 func pushNotificationForUser(NotificaionObject models.Notification, suffixTxt string) {
 	// TODO: add the notification to db... having a prob heree..
 	fmt.Println("Here in the NotificaionObject push func.")
+
 	if(!(NotificaionObject.Actorid == NotificaionObject.Uuid)) {
 		Client, ok := models.ClientPool.GetClient(NotificaionObject.Uuid);
 
 		if ok {
 			NotificaionObject.User_ = GetUserById(NotificaionObject.Actorid);
 			NotificaionObject.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
+
 			var resp models.SocketMessage = models.MakeSocketResp(models.NOTIFICATION, 200, NotificaionObject);
 			Client.SendJSON(resp);
+			
 		} else {
 			fmt.Println("Client offline.");
 		}
 
 		AddNewNotification(NotificaionObject);
 	}
+
 }
 
 // type socketResp struct {

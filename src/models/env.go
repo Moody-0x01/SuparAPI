@@ -26,11 +26,16 @@ func loadEnv(params ...string) map[string]string {
 
     for i := 0; i < len(Lines); i++ {
     	// fmt.Println("Line", Lines[i])
-    	next := strings.TrimSpace(Lines[i]);
-    	trimmed := strings.Trim(next, "\n");
-    	parsedLine := strings.Split(trimmed, "=");
-    	key, val := parsedLine[0], parsedLine[1];
-    	Map[key] = val;
+        if len(Lines[i]) > 0 {
+            next := strings.TrimSpace(Lines[i]);
+            trimmed := strings.Trim(next, "\n");
+            parsedLine := strings.Split(trimmed, "=");
+            
+            if len(parsedLine) == 2 {
+                key, val := parsedLine[0], parsedLine[1];
+                Map[key] = val;    
+            }
+        }
     }
 
     return Map;
@@ -38,6 +43,15 @@ func loadEnv(params ...string) map[string]string {
 
 func GetEnv(key string) string {
     EnvMap := loadEnv();
-    return EnvMap[key];
+    val, ok := EnvMap[key];
+    
+    if ok {
+    	return val;
+    } else {
+    	panicMsg := "KEY WAS NOT FOUND IN ENV: " + key;
+    	panic(panicMsg);
+    	return val;
+    }
+
 }
 

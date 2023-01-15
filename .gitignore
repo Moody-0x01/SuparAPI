@@ -11,6 +11,7 @@ db
 build
 public
 *.exe
+.env
 
 # Commit tracker
 autoPush.py 

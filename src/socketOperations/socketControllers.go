@@ -10,7 +10,6 @@ import (
 	"github.com/Moody0101-X/Go_Api/database"
 )
 
-
 var upgrader = websocket.Upgrader{
     //check origin will check the cross region source (note : please not using in production)
     ReadBufferSize:  1024,
@@ -42,8 +41,6 @@ func MainSocketHandler(c *gin.Context) {
 	client, ok := models.ClientPool.AddClient(ws.RemoteAddr().String(), uuid_, ws);
 
 	if(ok) {
-		go database.HandleClientConnection(client);
-	} else {
-		fmt.Println("Could not register client with uuid: ", uuid_);
-	}
+		go database.HandleClientConnection(client)
+	} else { fmt.Println("Could not register client with uuid: ", uuid_); }
 }

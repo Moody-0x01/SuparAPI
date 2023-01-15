@@ -141,6 +141,20 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 		return models.MakeServerResult(false, "could not add post. err L489")
 	}
 
+	// TODO: Broadcast the post Msg...
+	var PostObj models.Post;
+	
+	PostObj.Id_ = pid;
+	PostObj.Uid_ = uuid;
+	PostObj.Text = Text;
+	PostObj.Img = Img;
+
+	PostObj.User_ = GetUserById(PostObj.Uid_);
+
+	var SockMsg models.SocketMessage = models.MakeSocketResp(models.NEWPOST, 200, PostObj)
+
+	models.ClientPool.BroadCastJSON(SockMsg, uuid)
+	
 	return models.MakeServerResult(true, pid)
 }
 

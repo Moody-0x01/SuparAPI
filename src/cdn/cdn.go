@@ -13,10 +13,11 @@ import (
 )
 
 
-var api string = models.GetEnv("CDN_HOST")
+var api string = models.GetEnv("CDN_HOST");
 
 // GetCdnLink("./cdn.txt")
 // const api string = "http://192.168.79.20:8500"
+
 var addIMG string = api + "/Zimg/addAvatar"
 var addBG string = api + "/Zimg/addbg"
 var addPOST string = api + "/Zimg/NewPostImg"

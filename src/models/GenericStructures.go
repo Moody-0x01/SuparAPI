@@ -63,7 +63,6 @@ func MakeSocketResp(Action string, code int, data interface{}) SocketMessage {
 		default:
 			resp.Data = data
 			break
-
 	}
 
 	return resp;

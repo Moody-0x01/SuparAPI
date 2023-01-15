@@ -85,15 +85,16 @@ func run() {
 }
 
 func main() {
-	
-	err, path := database.InitializeDb();
+    	
+    var DB string = models.GetEnv("DB_PATH")
+    err, path := database.InitializeDb(DB);
 
-	if err != nil {
+    if err != nil {
         fmt.Println("Error opening the database! ", err.Error())
         return
     }
 
     fmt.Println("[!] connected to database ->", path)
-	run()
+    run()
 }
 

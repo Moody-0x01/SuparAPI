@@ -42,23 +42,32 @@ func (Hub *ClientHub) AddClient(Addr string, Uuid int, Conn *websocket.Conn) (*C
 	return &val, ok
 }
 
+func (Hub *ClientHub) BroadCastJSON(Msg interface{}, skip int) {
+	// Send the message for everyone..
+
+	if(!Hub.Initialized) {
+		return
+	}
+
+	Hub.Lock();
+
+   // Sends The action to all people in
+	{
+		for id, Client_ := range Hub.SocketClients { 
+			if(id != skip) {
+				Client_.SendJSON(Msg);
+			}
+		}
+	}
+
+	Hub.Unlock();
+}
+
 type Client struct {
 	Addr string
 	Uuid int
 	Conn *websocket.Conn
 }
-
-// func NewClient(Addr string, Uuid int, Conn *websocket.Conn) (*Client, bool) {
-// 	var New Client
-// 	New.Addr = Addr
-// 	New.Uuid = Uuid
-// 	New.Conn = Conn
-// 	// Register user by id.
-// 	SocketClients[Uuid] = New
-// 	New.logClient()
-// 	val, ok := SocketClients[Uuid]
-// 	return &val, ok
-// }
 
 func (c *Client) logClient() {
 	fmt.Println("addr: ", c.Addr)
@@ -89,7 +98,7 @@ func (c *Client) SendJSON(v interface{}) (err error) {
 // 			err := Client_.sendMessage(NewMsg)
 			
 // 			if err != nil {
-// 				fmt.Println("Erorr sending message to user #", id, " :", err)
+// 				fmt.Println( "Erorr sending message to user #", id, " :", err )
 // 			}
 // 		}
 

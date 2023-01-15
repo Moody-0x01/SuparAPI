@@ -16,10 +16,9 @@ import (
 var dataBase *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
-func InitializeDb() (error, string) {
+func InitializeDb(dbPath string) (error, string) {
 	
 	var err error
-	var dbPath string = "./db/Users.db"
 
 	dataBase, err = sql.Open("sqlite3", dbPath); if err != nil {
 		return err, ""
