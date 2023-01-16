@@ -43,9 +43,9 @@ func run() {
 	router.Static("/static", "./public/static")
 	router.Static("/img", "./public/img")
 	router.Static("/Global.css", "./public/Global.css")
-	
-	router.LoadHTMLGlob("public/*.html")
 
+	router.LoadHTMLGlob("public/*.html")
+	
 	// POST routes.
 	router.POST("/v2/login", routes.Login) // login and get a token for the updating/creation/deletion of personal data.
 	router.POST("/v2/update", routes.Update) // Updating user's information by token

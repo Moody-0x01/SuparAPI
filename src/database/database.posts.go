@@ -2,6 +2,7 @@ package database;
 
 import (
 	"fmt"
+	"time"
 	"github.com/Moody0101-X/Go_Api/models"
 	"github.com/Moody0101-X/Go_Api/cdn"
 )
@@ -36,7 +37,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 func GetAllPosts() []models.Post {
 	var Posts []models.Post
 
-	row, err := dataBase.Query("SELECT ID, USER_ID, Text, IMG FROM POSTS ORDER BY ID DESC")
+	row, err := dataBase.Query("SELECT ID, USER_ID, Text, IMG, CreatedDate FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
 
@@ -48,7 +49,7 @@ func GetAllPosts() []models.Post {
 	var temp models.Post
 
 	for row.Next() {
-		row.Scan(&temp.Id_, &temp.Uid_,&temp.Text, &temp.Img)
+		row.Scan(&temp.Id_, &temp.Uid_,&temp.Text, &temp.Img, &temp.Date)
 		temp.User_ = GetUserById(temp.Uid_)
 		Posts = append(Posts, temp)
 	}
@@ -78,7 +79,7 @@ func GetPostOwnerId(PostID int) (int, bool) {
 func GetUserPostById(id int) []models.Post {
 	// A functions to use 
 	var Posts []models.Post
-	row, err := dataBase.Query("SELECT ID, Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
+	row, err := dataBase.Query("SELECT ID, Text, IMG, CreatedDate FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
 
@@ -90,7 +91,7 @@ func GetUserPostById(id int) []models.Post {
 	var temp models.Post
 
 	for row.Next() {
-		row.Scan(&temp.Id_, &temp.Text, &temp.Img);
+		row.Scan(&temp.Id_, &temp.Text, &temp.Img, &temp.Date);
 		Posts = append(Posts, temp);
 	}
 
@@ -100,7 +101,7 @@ func GetUserPostById(id int) []models.Post {
 
 func GetPostById(Post_id int) models.Post {
 	
-	row, err := dataBase.Query("SELECT ID, Text, IMG, USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
+	row, err := dataBase.Query("SELECT ID, Text, IMG, USER_ID, CreatedDate FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
 	
 	defer row.Close()
 	
@@ -112,7 +113,7 @@ func GetPostById(Post_id int) models.Post {
 	}
 
 	for row.Next() {
-		row.Scan(&PostOB.Id_, &PostOB.Text, &PostOB.Img, &PostOB.Uid_);
+		row.Scan(&PostOB.Id_, &PostOB.Text, &PostOB.Img, &PostOB.Uid_, &PostOB.Date);
 		PostOB.User_ = GetUserById(PostOB.Uid_)
 	}
 
@@ -134,7 +135,7 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 
 	}
 
-	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG) VALUES(?, ?, ?)")
+	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG, CreatedDate) VALUES(?, ?, ?, datetime())")
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil {
@@ -148,6 +149,7 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 	PostObj.Uid_ = uuid;
 	PostObj.Text = Text;
 	PostObj.Img = Img;
+	PostObj.Date = time.Now();
 
 	PostObj.User_ = GetUserById(PostObj.Uid_);
 

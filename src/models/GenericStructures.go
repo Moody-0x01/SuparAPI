@@ -2,16 +2,18 @@ package models
 
 import (
 	"fmt"
+	"time"
 )
 
 func isEmpty(s string) bool { return len(s) == 0 }
 
 type Post struct {
-	Id_  int 	`json:"id"`
-	Uid_ int 	`json:"uuid"`
-	Text string `json:"text"`
-	Img	 string `json:"img"`
+	Id_   int 	`json:"id"`
+	Uid_  int 	`json:"uuid"`
+	Text  string `json:"text"`
+	Img	  string `json:"img"`
 	User_ AUser   `json:"user"` 
+	Date  time.Time `json:"date"`
 }
 
 type Result struct {
@@ -63,6 +65,7 @@ func MakeSocketResp(Action string, code int, data interface{}) SocketMessage {
 		default:
 			resp.Data = data
 			break
+
 	}
 
 	return resp;
