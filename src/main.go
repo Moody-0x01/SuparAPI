@@ -8,6 +8,7 @@ import (
 	"github.com/Moody0101-X/Go_Api/socketOperations"
 	"github.com/Moody0101-X/Go_Api/routes"
 	"github.com/Moody0101-X/Go_Api/database"
+	"github.com/Moody0101-X/Go_Api/networking"
 	"github.com/Moody0101-X/Go_Api/models"
 )
 
@@ -32,8 +33,8 @@ func RequestCancelRecover() gin.HandlerFunc {
 func run() {
 	// GET THE PORT :)
 	var PORT string = models.GetEnv("PORT")
-	var CDN string = models.GetEnv("CDN_HOST")
-
+	var CDN string = "http://" + networking.GetCurrentMachineIp() + ":8500"
+	var APP_LINK string = "http://" + networking.GetCurrentMachineIp() + PORT
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.Use(cors.Default())	
@@ -81,12 +82,24 @@ func run() {
 	// running the server.
 	fmt.Println("[!] Serving in port -> ", PORT)
 	fmt.Println("[!] Using cdn ->", CDN)
+	fmt.Println("[!] Go to this link to review the app: ", APP_LINK)
+	fmt.Println()
+	fmt.Println()
+
 	router.Run(PORT)
 }
 
 func main() {
-    	
-    var DB string = models.GetEnv("DB_PATH")
+    
+    fmt.Println()
+	fmt.Println()
+
+    var env string = models.GetEnv("ENV")
+    
+    fmt.Println("[!] Environement ->", env)
+
+    var DB string = models.GetEnv("DB_PATH" + env)
+    
     err, path := database.InitializeDb(DB);
 
     if err != nil {

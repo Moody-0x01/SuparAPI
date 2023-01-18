@@ -23,9 +23,10 @@ import (
     "math/rand"
     "time"
     "strconv"
+    "github.com/Moody0101-X/Go_Api/models"
 )
 
-var SecretJwtKey []byte = []byte("d700977a3b1e3fd0145853702bdbb2a522530bb9707d314209d07b81dff3c17a")
+var JWT_SECRET_KEY []byte = []byte(models.GetEnv("JWT_KEY"))
 
 /* DONE */
 
@@ -43,7 +44,7 @@ func StoreTokenInJWT(Token string) (string, error) {
         "T": Token,
     })
 
-    tokenString, err := token.SignedString(SecretJwtKey)
+    tokenString, err := token.SignedString(JWT_SECRET_KEY)
     return tokenString, err
 }
 
@@ -55,7 +56,7 @@ func GetTokenFromJwt(TokenStr string) (string, bool) {
             return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
         }
 
-        return SecretJwtKey, nil
+        return JWT_SECRET_KEY, nil
     })
 
     if err != nil {
@@ -97,3 +98,4 @@ func GenerateAccessToken(salt string) string {
     var final string = _IV + b64.StdEncoding.EncodeToString(SaltAsBytes);
     return Sha256_(final);
 }
+

@@ -159,7 +159,7 @@ func NewPost(c *gin.Context) {
 			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
 			return
 		}
-
+		
 		c.JSON(http.StatusOK, models.MakeServerResponse(500, "the user was not added. problem in db."))
 		return
 	}

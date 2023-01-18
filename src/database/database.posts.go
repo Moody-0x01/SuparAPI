@@ -10,7 +10,6 @@ import (
 func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 
 	FetchedUser, err := GetUserByToken(Token);
-	
 	ownerId, ok := GetPostOwnerId(PostId);
 
 	if ok {
@@ -74,8 +73,6 @@ func GetPostOwnerId(PostID int) (int, bool) {
 	return id, true
 }
 
-
-
 func GetUserPostById(id int) []models.Post {
 	// A functions to use 
 	var Posts []models.Post
@@ -97,7 +94,6 @@ func GetUserPostById(id int) []models.Post {
 
 	return Posts
 }
-
 
 func GetPostById(Post_id int) models.Post {
 	
@@ -160,7 +156,6 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 	return models.MakeServerResult(true, pid)
 }
 
-
 func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwnerId int) models.Result {
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
     // uuid INTEGER,
@@ -193,7 +188,6 @@ func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwn
     }
 
     return models.MakeServerResult(false, "coult not get user id.")
-	
 }
 
 func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result {
@@ -223,8 +217,7 @@ func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result
 		return models.MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
 	}
 
-	return models.MakeServerResult(false, "coult not get user id.")
-	
+	return models.MakeServerResult(false, "coult not get user id.")	
 }
 
 func Remove_like(uuid int, PostId int, Token string) models.Result {
@@ -250,13 +243,13 @@ func Remove_like(uuid int, PostId int, Token string) models.Result {
 		return models.MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
 	}
 
-	return models.MakeServerResult(false, "coult not get user id.")
-	
+	return models.MakeServerResult(false, "coult not get user id.")	
 }
 
 
 func Get_comments(PostId int) []models.Comment {
 	// finished this one.
+	
 	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
     // uuid INTEGER,
     // post_id integer,
@@ -303,8 +296,8 @@ func Get_likes(PostId int) []models.Like {
 	}
 
 	var temp models.Like
-
 	for row.Next() {
+
 	row.Scan(&temp.Id_,&temp.Uuid)
 		temp.User_ = GetUserById(temp.Uuid)
 		likes = append(likes, temp)

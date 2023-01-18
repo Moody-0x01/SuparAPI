@@ -10,14 +10,16 @@ import (
     "bytes"
     "strings"
     "github.com/Moody0101-X/Go_Api/models"
+    "github.com/Moody0101-X/Go_Api/networking"
 )
 
 
-var api string = models.GetEnv("CDN_HOST");
+
 
 // GetCdnLink("./cdn.txt")
 // const api string = "http://192.168.79.20:8500"
 
+var api string = "http://" + networking.GetCurrentMachineIp() + ":8500"
 var addIMG string = api + "/Zimg/addAvatar"
 var addBG string = api + "/Zimg/addbg"
 var addPOST string = api + "/Zimg/NewPostImg"
