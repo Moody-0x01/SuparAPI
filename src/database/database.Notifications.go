@@ -64,7 +64,8 @@ func pushNotificationForUser(NotificaionObject models.Notification, suffixTxt st
 			NotificaionObject.User_ = GetUserById(NotificaionObject.Actorid);
 			NotificaionObject.Text = NotificaionObject.User_.UserName + " " + suffixTxt;
 
-			var resp models.SocketMessage = models.MakeSocketResp(models.NOTIFICATION, 200, NotificaionObject);
+			var resp models.SocketMessage = NotificaionObject.EncodeToSocketResponse();
+
 			Client.SendJSON(resp);
 			
 		} else {

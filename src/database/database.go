@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	// "sync"
+	"github.com/Moody0101-X/Go_Api/models"
+	"strings"
 )
 
 // struct DB type {
@@ -32,6 +34,7 @@ func isEmpty(s string) bool { return len(s) == 0 }
 func GetNextUID(Table string) int {
 
 	var id int;
+	
 	row, err := dataBase.Query("select MAX(ID) from " + Table);
 	
 	defer row.Close()
@@ -44,3 +47,26 @@ func GetNextUID(Table string) int {
 
 	return id + 1;
 }
+
+func GetNewPostID() int {
+
+	var id int;
+	
+	row, err := dataBase.Query("select MAX(ID) + 1 from Posts");
+	
+	defer row.Close()
+
+	if err != nil { return 0 }
+
+	for row.Next() {
+		row.Scan(&id);
+	}
+
+	return id;
+}
+
+
+func CheckCdnLink(link string) string {
+	return strings.ReplaceAll(link, "http://localhost:8500", models.CDN_API);
+}
+    

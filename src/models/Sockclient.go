@@ -86,21 +86,3 @@ func (c *Client) SendJSON(v interface{}) (err error) {
 	err = conn.WriteJSON(v)
 	return err
 }
-
-// func BroadCast(msg []byte, c *Client)  {
-// 	defer c.Conn.Close();
-
-// 	for id, Client_ := range SocketClients {
-		
-// 		if Client_ != *c {				
-// 			var NewMsg string = strconv.Itoa(c.Uuid) + " said: " + string(msg)
-			
-// 			err := Client_.sendMessage(NewMsg)
-			
-// 			if err != nil {
-// 				fmt.Println( "Erorr sending message to user #", id, " :", err )
-// 			}
-// 		}
-
-// 	}
-// }

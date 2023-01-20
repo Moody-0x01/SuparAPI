@@ -36,6 +36,10 @@ func (n *NotificationSeenFlag) LogSeen() {
 	fmt.Println("uuid: ", n.Uuid)
 }
 
+func (N *Notification) EncodeToSocketResponse() SocketMessage { 
+	return MakeSocketResp(NOTIFICATION, 200, N) 
+}
+
 func NewNot(t int, uuid int, actorid int) Notification {
 	var new Notification;	
 	new.Type = t;
@@ -44,4 +48,6 @@ func NewNot(t int, uuid int, actorid int) Notification {
 	new.Seen = 0;
 	return new;
 }
+
+
 

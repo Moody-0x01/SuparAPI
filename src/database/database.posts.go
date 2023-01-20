@@ -50,6 +50,7 @@ func GetAllPosts() []models.Post {
 	for row.Next() {
 		row.Scan(&temp.Id_, &temp.Uid_,&temp.Text, &temp.Img, &temp.Date)
 		temp.User_ = GetUserById(temp.Uid_)
+		temp.Img = CheckCdnLink(temp.Img); // Fix for the api cdn images...
 		Posts = append(Posts, temp)
 	}
 	
@@ -89,6 +90,7 @@ func GetUserPostById(id int) []models.Post {
 
 	for row.Next() {
 		row.Scan(&temp.Id_, &temp.Text, &temp.Img, &temp.Date);
+		temp.Img = CheckCdnLink(temp.Img);
 		Posts = append(Posts, temp);
 	}
 
@@ -110,15 +112,29 @@ func GetPostById(Post_id int) models.Post {
 
 	for row.Next() {
 		row.Scan(&PostOB.Id_, &PostOB.Text, &PostOB.Img, &PostOB.Uid_, &PostOB.Date);
-		PostOB.User_ = GetUserById(PostOB.Uid_)
+		PostOB.Img = CheckCdnLink(PostOB.Img);
+		PostOB.User_ = GetUserById(PostOB.Uid_);
 	}
 
 	return PostOB
 }
 
 func AddPost(Text string, Img string, uuid int) (models.Result) {
+	/* 
 
-	var pid int = GetNextUID("Posts")
+		TODO: 
+			We have a bug here!, the uuid that is sent to the user afte the post is added is incorrect!
+			so it messes up the rendering of the react comp tree..
+
+			Because When we want to delete a certain post we need to verify if it is Your post!
+			also, the id is the key of the UI post comp, so.. making alot of problems in the tree?
+
+			Solution Idea1 has failed -> GetNextUID
+			Solved, what a dumbass I was getting the maximum id before actually adding a new Post!!!!!!!!!!
+
+	*/
+
+	var pid int = -1;
 
 	if !isEmpty(Img) {
 		var ok bool;
@@ -134,25 +150,27 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG, CreatedDate) VALUES(?, ?, ?, datetime())")
 	_, err := stmt.Exec(uuid, Text, Img)
 
-	if err != nil {
-		return models.MakeServerResult(false, "could not add post. err L489")
-	}
+	if err != nil { return models.MakeServerResult(false, "could not add post. err L149") }
+
+	pid = GetNewPostID();
+	
+	if pid == 0 { return models.MakeServerResult(false, "could not get pid. err L154") }
 
 	// TODO: Broadcast the post Msg...
-	var PostObj models.Post;
 	
+	var PostObj models.Post;
 	PostObj.Id_ = pid;
 	PostObj.Uid_ = uuid;
 	PostObj.Text = Text;
-	PostObj.Img = Img;
+	PostObj.Img = CheckCdnLink(Img); 
 	PostObj.Date = time.Now();
 
 	PostObj.User_ = GetUserById(PostObj.Uid_);
 
-	var SockMsg models.SocketMessage = models.MakeSocketResp(models.NEWPOST, 200, PostObj)
-
-	models.ClientPool.BroadCastJSON(SockMsg, uuid)
+	SockMsg := PostObj.EncodeToSocketResponse();
 	
+	models.ClientPool.BroadCastJSON(SockMsg, uuid)
+
 	return models.MakeServerResult(true, pid)
 }
 

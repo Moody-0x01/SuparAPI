@@ -8,9 +8,8 @@ import (
 )
 
 func AuthenticateUserJWT(UserJWT string) models.Response {
-   
-    Token, Ok := crypto.GetTokenFromJwt(UserJWT)
-
+    Token, Ok := crypto.GetTokenFromJwt(UserJWT);
+    
     if Ok {
      
         User_, err := GetUserByToken(Token)
@@ -60,6 +59,8 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (models.User, model
 
 			for row.Next() {
 				row.Scan(&user.Id_, &user.Email, &user.UserName, &user.Token, &user.Img, &user.Bg,  &user.Bio, &user.Address)
+				user.Img = CheckCdnLink(user.Img);
+				user.Bg = CheckCdnLink(user.Bg);
 			}
 
 			JWT, err := crypto.StoreTokenInJWT(user.Token)
@@ -93,6 +94,8 @@ func GetUserById(id int) models.AUser {
 
 	for row.Next() {
 		row.Scan(&User.Id_, &User.UserName,&User.Img, &User.Bg, &User.Bio, &User.Address)
+		User.Img = CheckCdnLink(User.Img);
+		User.Bg = CheckCdnLink(User.Bg);
 	}
 
 	return User
@@ -112,6 +115,8 @@ func GetUserByToken(Token string) (models.User, error) {
 
 	for row.Next() {
 		row.Scan(&User_.Id_, &User_.UserName, &User_.Img, &User_.Bg, &User_.Bio, &User_.Address)
+		User_.Img = CheckCdnLink(User_.Img);
+		User_.Bg = CheckCdnLink(User_.Bg);
 	}
 
 	return User_, nil
@@ -134,6 +139,8 @@ func GetUsers(uuid interface{}) []models.AUser {
 			for row.Next() {
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
 				temp.IsFollowed = IsFollowing(temp.Id_, uuid.(int))
+				temp.Img = CheckCdnLink(temp.Img);
+				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)
 			}
 
@@ -154,6 +161,8 @@ func GetUsers(uuid interface{}) []models.AUser {
 			for row.Next() {
 				
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				temp.Img = CheckCdnLink(temp.Img);
+				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)
 			}
 
@@ -187,6 +196,8 @@ func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
 				var temp models.AUser
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
 				temp.IsFollowed = IsFollowing(temp.Id_, int(uuid.(int)))
+				temp.Img = CheckCdnLink(temp.Img);
+				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)	
 			}
 
@@ -206,6 +217,8 @@ func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
 			for row.Next() {
 				var temp models.AUser
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
+				temp.Img = CheckCdnLink(temp.Img);
+				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)	
 			}
 
@@ -251,27 +264,21 @@ func CheckUser(Email string) bool {
 		
 	row, err := dataBase.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 	defer row.Close()
-	var u []models.User;
+	var u []int;
 
 	if err != nil {
 		fmt.Println(err)
 		return false
 	}
 
-	var temp models.User
+	var id int;
 
 	for row.Next() {	
-		row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-		u = append(u, temp)	
+		row.Scan(&id)
+		u = append(u, id)
 	}
 
-	if len(u) == 1 {
-		return true
-	} else if len(u) == 0 {
-		return false
-	} else {
-		return true
-	}
+	return (len(u) >= 1);
 }
 
 func AddUser(user models.User) models.Response {
@@ -351,7 +358,6 @@ func UpdateUser(field string, newValue string, Token string) models.Result {
 	var ok bool;
 	var Query string
 	
-
 	switch field {
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"

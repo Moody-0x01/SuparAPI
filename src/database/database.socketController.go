@@ -7,6 +7,8 @@ import (
 )
 
 func HandleClientConnection(c *models.Client) {
+	// TODO: Add a new case in the switch that will handle the messages that will be routed to another u connexion.Running
+Loop:
 	for {
 		
 		var sockmsg models.SocketMessage
@@ -14,7 +16,7 @@ func HandleClientConnection(c *models.Client) {
 
 		if err != nil {
 			fmt.Println(err);
-			break
+			break Loop
 		}
 
 		switch sockmsg.Action {
@@ -30,4 +32,5 @@ func HandleClientConnection(c *models.Client) {
 
 		}
 	}
+
 }

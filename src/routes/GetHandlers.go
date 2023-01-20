@@ -7,6 +7,20 @@ import (
 	"github.com/Moody0101-X/Go_Api/models"
 	"github.com/Moody0101-X/Go_Api/database"
 )
+/* 
+TODO:
+
+	- Getter for the conversation
+
+	BLUEPRINT:	
+		
+		func name(convo_id) {
+			""" Get the conversation by conversation id !"""
+			return convo(
+				convo_id
+			);
+		}
+*/
 
 func GetAllPostsRoute(c *gin.Context) {
 	All := database.GetAllPosts()
@@ -25,9 +39,7 @@ func GetUserPostsRoute(c *gin.Context) {
 
 	var UserPosts []models.Post = database.GetUserPostById(id_)
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, UserPosts))
-
 }
-
 func GetUsersRoute(c *gin.Context) {
 	var q string = GetFieldFromContext(c, "q")
 	var uuid string = GetFieldFromContext(c, "uuid")
@@ -68,7 +80,6 @@ func GetUsersRoute(c *gin.Context) {
 		}
 	}
 }
-
 func GetUserByIdRoute(c *gin.Context) {
 	
 	var uuid string = GetFieldFromContext(c, "uuid")
@@ -98,7 +109,6 @@ func GetUserByIdRoute(c *gin.Context) {
 	
 	c.JSON(http.StatusOK, res)
 }
-
 func GetPostComments(c *gin.Context) {
 	var pid string = c.Param("pid")
 	
@@ -113,7 +123,6 @@ func GetPostComments(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, comments))
 }
-
 func GetPostLikes(c *gin.Context) {
 	var pid string = c.Param("pid")
 	
@@ -128,8 +137,6 @@ func GetPostLikes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, likes))
 }
-
-
 func GetUserFollowingsById(c *gin.Context) {
 	
 	var uuid string = c.Param("uuid")
@@ -146,7 +153,6 @@ func GetUserFollowingsById(c *gin.Context) {
 	
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
 }
-
 func GetUserFollowersById(c *gin.Context) {
 	
 	var uuid string = c.Param("uuid")
@@ -162,6 +168,7 @@ func GetUserFollowersById(c *gin.Context) {
 	
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
 }
+// func GetUserByIdRoute(c *gin.Context) int { return }
 
 func GetPostByPostidRoute(c *gin.Context) {
 	var pid string = c.Param("pid")

@@ -1,6 +1,9 @@
 package models;
+import "github.com/Moody0101-X/Go_Api/networking"
 
-const (
+
+
+var (
 	FOLLOW                     = 0
     LIKE                       = 1
     COMMENT                    = 2
@@ -8,8 +11,9 @@ const (
     NEWPOST                    = "NP"
     POSTCHANGE                 = "PC"
     MSG                        = "M"
-    DefaultUserImg string      = "/img/defUser.jpg"
-    DefaultUserBg string       = "/img/defBg.jpg"
-    DefaultUserBio string      = "Wait for it to load :)"
-    DefaultUserAddress string  = "Everywhere"
+    DefaultUserImg             = "/img/defUser.jpg"
+    DefaultUserBg              = "/img/defBg.jpg"
+    DefaultUserBio             = "Wait for it to load :)"
+    DefaultUserAddress         = "Everywhere"
+    CDN_API                    = "http://" + networking.GetCurrentMachineIp() + ":8500"
 )

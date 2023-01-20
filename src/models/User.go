@@ -1,7 +1,5 @@
 package models;
 
-
-
 type User struct {
 	Id_ 		 int `json:"id_"`
 	Email 		 string `json:"Email"`
@@ -14,8 +12,6 @@ type User struct {
 	Address		 string `json:"addr"`
 }
 
-
-
 type AUser struct {
 	Id_ 		 int `json:"id_"`
 	UserName 	 string `json:"UserName"`
@@ -25,7 +21,6 @@ type AUser struct {
 	Address		 string `json:"addr"`
 	IsFollowed	 bool `json:"isfollowed"`
 }
-
 
 func (U *User) SetDefaults() {
 	//TODO Setting the default fields to add to the db if some are not present.

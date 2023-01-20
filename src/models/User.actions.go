@@ -28,14 +28,6 @@ type Follow struct {
 	Followed_id		int `json:"follower_id"`
 }
 
-type TokenizedPost struct {
-	PostID int `json:"id_"`
-	Token string `json:"token"`
-	Uuid  int `json:"uuid"`	
-	Text  string `json:"text"`
-	Img   string `json:"img"`
-}
-
 type TokenizedComment struct {
 	Post_id		 int `json:"post_id"`
 	Uuid		 int `json:"uuid"`
@@ -56,18 +48,3 @@ type UserLogin struct {
 	Email    string `json:"Email"`
 	Token 	 string `json:"T"`
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
