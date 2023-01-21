@@ -199,3 +199,5 @@ func GetAllNotificationsRoute(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.MakeServerResponse(200, Notifications))
 }
+
+func GetUserDiscussionsRoute(c *gin.Context) { c.JSON(http.StatusOK, models.MakeServerResponse(204, "no content, NOT IMPLEMENTED yet!! sorry!")) }

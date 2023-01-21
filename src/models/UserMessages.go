@@ -1,3 +1,5 @@
+// READ CODE NOT DOCUMENTATION !
+
 package models
 
 import (
@@ -9,12 +11,13 @@ const (
 	Audio = "Audio"
 	Image = "Image"
 	Video = "Video"
+	Text  = "plain-text"
 )
 
 type Discussion struct {
 	Id_         int         `json:"id"`
 	Fpair 		int 		`json:"fpair"`
-	Spair		int 		`json:"fpair"`
+	Spair		int 		`json:"spair"`
 	Messages 	[]UMessage 	`json:"messages"`
 	timeStamp 	time.Time   `json:"ts"`
 }
@@ -53,7 +56,7 @@ func NewDiscussion(fpair int, spair int, MList []UMessage) *Discussion {
 		Fpair: fpair,
 		Spair: spair,
 		Messages: MList,
-		timeStamp: time.Now()
+		timeStamp: time.Now(),
 	}
 }
 
