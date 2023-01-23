@@ -98,7 +98,7 @@ func MakeServerResponse(code int, data interface{}) Response {
 			Resp.Data = data.([]Notification)
 			break
 		case []Discussion:
-			Resp.Data = data.([]Discussion)
+			Resp.Data = data.([]Discussion)	
 			break
 
 		case Discussion:

@@ -15,7 +15,6 @@ import (
 
 
 
-
 // GetCdnLink("./cdn.txt")
 // const api string = "http://192.168.79.20:8500"
 var addIMG string = models.CDN_API + "/Zimg/addAvatar"

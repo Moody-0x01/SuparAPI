@@ -41,6 +41,7 @@ type UMessage struct {
 	Other_id 				int 	     `json:"other_id"`
 	Topic_id 				int 	     `json:"topic_id"`
 	TimeStamp 				time.Time    `json:"ts"`
+	Seen					int          `json: "seen"`
 }
 
 func (m *UMessage) Log() {
@@ -74,7 +75,6 @@ func NewDiscussion(fpair int, spair int, MList []UMessage) *Discussion {
 		TimeStamp: time.Now(),
 	}
 }
-
 
 
 func (Message *UMessage) Send(c *Client) {

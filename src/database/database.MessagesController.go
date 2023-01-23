@@ -47,7 +47,7 @@ func DiscussionExists(topic_id int, other_id int) int {
 	
 	var conversation_id int = -1;
 
-	row, err := DATABASE.Query("SELECT ID FROM CONVERSATIONS WHERE Fpair=? AND Spair=?", topic_id, other_id)
+	row, err := DATABASE.Query("SELECT ID FROM CONVERSATIONS WHERE Fpair=? AND Spair=? OR Fpair=? AND Spair=?", topic_id, other_id, other_id, topic_id)
 				
 	if err != nil {
 		return conversation_id;
@@ -62,17 +62,19 @@ func DiscussionExists(topic_id int, other_id int) int {
 	return conversation_id;
 }
 
-func SendMessage(client *models.Client, Message models.UMessage) {
-	
-	
+func SendMessage(client *models.Client, Message models.UMessage) {	
 	Message.Topic_id = client.Uuid;	
+	conversation_id := CreateNewDiscussion(Message.Topic_id , Message.Other_id);
+	Message.ConversationId = conversation_id;
 	
 	c, ok := models.ClientPool.GetClient(Message.Other_id);
-	if ok { Message.Send(&c) }
+	
+	if ok { 
+		Message.Send(&c) 
+	}
 
 	//TODO we add COnversation to reg
-	conversation_id := CreateNewDiscussion(Message.Topic_id , Message.Other_id);	
-	Message.ConversationId = conversation_id;
+
 	//TODO we add the message to db.
 	// Message.Log();
 
@@ -93,16 +95,16 @@ func GetUserDiscussions(User_id int, Token string) models.Response {
 	
 	if ok {
 		if id == User_id {
-			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE Fpair=? OR Spair=?", User_id, User_id);
+			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE Fpair=? OR Spair=? ORDER BY ID ASC", User_id, User_id);
 			
 			if err != nil {
-				return models.MakeServerResponse(204, "no content");
+				return models.MakeServerResponse(500, "Internal serevr error");
 			}
 			
 			defer row.Close();
 			
 			var temp models.Discussion;
-			
+
 			for row.Next() {
 				// Fpair, Spair, timestamp
 				row.Scan(&temp.Id_, &temp.Fpair, &temp.Spair, &temp.TimeStamp);
@@ -117,14 +119,13 @@ func GetUserDiscussions(User_id int, Token string) models.Response {
 	return models.MakeServerResponse(401, "Not authorized!")
 }
 
-
 func GetMessagesByConvId(id int) []models.UMessage {
+	
 	var Messages []models.UMessage;
 
-	row, err := DATABASE.Query("SELECT * FROM MESSAGES WHERE Coversation_id=?", id);
+	row, err := DATABASE.Query("SELECT ID, Msg, MsgType, topic_id, other_id, ts FROM MESSAGES WHERE Coversation_id=? ORDER BY ID ASC", id);
 	
-	if err != nil {
-		
+	if err != nil {	
 		fmt.Println("err in retrv user messages: ")
 		fmt.Println("", err.Error())
 		return Messages;
@@ -135,13 +136,15 @@ func GetMessagesByConvId(id int) []models.UMessage {
 	var temp models.UMessage;
 	
 	for row.Next() {
-		// Msg, MsgType, Coversation_id, topic_id, other_id, ts, seen
+		// ID, Msg, MsgType, Coversation_id, topic_id, other_id, ts
 		row.Scan(&temp.Id_, &temp.Data.Text, &temp.Data.MsgType, &temp.Topic_id, &temp.Other_id, &temp.TimeStamp);
+		temp.ConversationId = id;
 		Messages = append(Messages, temp);
 	}
 
 	return Messages
 }
+
 func GetDiscussionById(uuid int, Token string, conversation_id int) models.Response {
 	
 	var Discussion models.Discussion;
@@ -149,9 +152,7 @@ func GetDiscussionById(uuid int, Token string, conversation_id int) models.Respo
 	
 	if ok {
 		if id == uuid {
-
-			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE ID=?", conversation_id);
-			
+			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE ID=? ORDER BY ID ASC", conversation_id);
 			if err != nil {
 				fmt.Println("DB ERROR:", err);
 				return models.MakeServerResponse(500, "Internal serevr error")

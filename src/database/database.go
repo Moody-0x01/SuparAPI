@@ -14,7 +14,6 @@ import (
 // 	DATABASE *sql.DB
 // }
 
-
 var DATABASE *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
@@ -69,4 +68,3 @@ func GetNewPostID() int {
 func CheckCdnLink(link string) string {
 	return strings.ReplaceAll(link, "http://localhost:8500", models.CDN_API);
 }
-    
