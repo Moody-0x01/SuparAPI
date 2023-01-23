@@ -2,11 +2,11 @@ package main;
 
 import (
 	"fmt"
-	"database/sql"
+	"DATABASE/sql"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var dataBase *sql.DB
+var DATABASE *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
 
@@ -15,7 +15,7 @@ func initializeDb() (error, string) {
 	var err error
 	var dbPath string = "./db/Users.db"
 
-	dataBase, err = sql.Open("sqlite3", dbPath); if err != nil {
+	DATABASE, err = sql.Open("sqlite3", dbPath); if err != nil {
 		return err, ""
 	}
 
@@ -39,7 +39,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) Response {
 		if err != nil { return MakeServerResponse(500, "db error, could not fetch user by token.") }
 		if uuid != FetchedUser.Id_ { return MakeServerResponse(401, "Not authorized!") }
 
-		stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
+		stmt, _ := DATABASE.Prepare("DELETE FROM POSTS WHERE ID=?")
 
 		result, err := stmt.Exec(PostId) // Execute query.
 
@@ -61,7 +61,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) Response {
 func GetAllPosts() []Post {
 	var Posts []Post
 
-	row, err := dataBase.Query("SELECT ID, USER_ID, Text, IMG FROM POSTS ORDER BY ID DESC")
+	row, err := DATABASE.Query("SELECT ID, USER_ID, Text, IMG FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
 
@@ -84,7 +84,7 @@ func GetAllPosts() []Post {
 
 func getPostOwnerId(PostID int) (int, bool) {
 	var id int
-	row, err := dataBase.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
+	row, err := DATABASE.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
 	defer row.Close()
 	
 	if err != nil {
@@ -103,7 +103,7 @@ func getPostOwnerId(PostID int) (int, bool) {
 func getUserPostById(id int) []Post {
 	// A functions to use 
 	var Posts []Post
-	row, err := dataBase.Query("SELECT ID, Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
+	row, err := DATABASE.Query("SELECT ID, Text, IMG FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
 
@@ -130,7 +130,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Result) {
 	if CheckUser(Email) {
 
 		var user User
-		row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
+		row, err := DATABASE.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
 		
 		defer row.Close()
 
@@ -146,7 +146,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (User, Result) {
 		}
 		
 		if sha256_(Pwd) == pwdHash {
-			row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+			row, err := DATABASE.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 
 			defer row.Close()
 
@@ -182,7 +182,7 @@ func getUserById(id int) AUser {
 	
 	var User AUser
 
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
+	row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
 	defer row.Close()
 	
 	if err != nil {
@@ -200,7 +200,7 @@ func getUserById(id int) AUser {
 func getUserByToken(Token string) (User, error) {
 	
 	var User_ User
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
+	row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
 	defer row.Close()
 
@@ -221,7 +221,7 @@ func getUsers(uuid interface{}) []AUser {
 	var Users []AUser
 	switch uuid.(type) {
 		case int:
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 			defer row.Close()
 			
 			if err != nil {
@@ -241,7 +241,7 @@ func getUsers(uuid interface{}) []AUser {
 
 		case bool:
 
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 			defer row.Close()
 			
 			if err != nil {
@@ -274,7 +274,7 @@ func getUsersByQuery(Q string, uuid interface{}) []AUser {
 
 	switch uuid.(type) {
 		case int:
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
 			defer row.Close()
 
@@ -294,7 +294,7 @@ func getUsersByQuery(Q string, uuid interface{}) []AUser {
 
 		case bool:
 			
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
 			defer row.Close()
 
@@ -331,7 +331,7 @@ func GetUserByJWToken(JWToken string) (User, bool) {
 
 func GetUserIdByToken(t string) (int, bool) {
 	var id int
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
 	defer row.Close()
 
 	if err != nil {
@@ -349,7 +349,7 @@ func GetUserIdByToken(t string) (int, bool) {
 func GetUserByToken(Token string) User {
 
 	var User_ User;
-	row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
+	row, err := DATABASE.Query("SELECT ID, EMAIL, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 
 	defer row.Close()
 
@@ -370,7 +370,7 @@ func GetUserByToken(Token string) User {
 
 func CheckUser(Email string) bool {
 		
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 	defer row.Close()
 	var u []User;
 
@@ -398,7 +398,7 @@ func CheckUser(Email string) bool {
 func GetNextUID(Table string) int {
 
 	var id int;
-	row, err := dataBase.Query("select MAX(ID) from " + Table);
+	row, err := DATABASE.Query("select MAX(ID) from " + Table);
 	
 	defer row.Close()
 
@@ -440,7 +440,7 @@ func AddUser(user User) Response {
 
 		/*------------Add To cdn-------------*/
 
-		stmt, _ := dataBase.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
+		stmt, _ := DATABASE.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, img, user.Bio, bg, user.Address)
 		
 		if err != nil {
@@ -472,7 +472,7 @@ func AddUser(user User) Response {
 func getuuidByToken(Token string) (int, bool) {
 	
 	var uuid int
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
 	
 	defer row.Close()
 
@@ -542,7 +542,7 @@ func updateUser(field string, newValue string, Token string) Result {
 
 	if ok {
 
-		stmt, _ := dataBase.Prepare(Query)
+		stmt, _ := DATABASE.Prepare(Query)
 		_, err := stmt.Exec(newValue, Token)
 
 		if err != nil {
@@ -573,7 +573,7 @@ func AddPost(Text string, Img string, uuid int) Result {
 
 	}
 
-	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG) VALUES(?, ?, ?)")
+	stmt, _ := DATABASE.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG) VALUES(?, ?, ?)")
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil {
@@ -597,7 +597,7 @@ func add_comment(uuid int, commentText string, PostId int, Token string) Result 
     id, ok := GetUserIdByToken(Token)
     if ok {
     	if id == uuid {
-    		stmt, _ := dataBase.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
+    		stmt, _ := DATABASE.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
 			_, err := stmt.Exec(uuid, PostId, commentText)
 
 			if err != nil {
@@ -625,7 +625,7 @@ func add_like(uuid int, PostId int, Token string) Result {
 
 	if ok {
 		if id == uuid {
-			stmt, _ := dataBase.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -652,7 +652,7 @@ func remove_like(uuid int, PostId int, Token string) Result {
 
 	if ok {
 		if id == uuid {
-			stmt, _ := dataBase.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
+			stmt, _ := DATABASE.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -680,7 +680,7 @@ func get_comments(PostId int) []Comment {
 	
 	var comments []Comment
 
-	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
 	
 	defer row.Close()
 
@@ -709,7 +709,7 @@ func get_likes(PostId int) []Like {
 
 	var likes []Like
 
-	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
 
 	defer row.Close()
 
@@ -741,7 +741,7 @@ func follow(follower_id int, followed_id int, Token string) Result {
 
 	if ok {
 		if id == follower_id {
-			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
 			_, err := stmt.Exec(follower_id, followed_id)
 
 			if err != nil {
@@ -765,7 +765,7 @@ func unfollow(follower_id int, followed_id int, Token string) Result {
 	if ok {
 		if id == follower_id {
 
-			stmt, _ := dataBase.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
+			stmt, _ := DATABASE.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
 			_, err := stmt.Exec(follower_id, followed_id)
 
 			if err != nil {
@@ -791,7 +791,7 @@ func getFollowers(followed int) []int {
 	// people who is following followed.
 	var followers []int;
 
-	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
+	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
 	
 	//  CREATE TABLE FOLLOWERS (
  	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -825,7 +825,7 @@ func getFollowings(following int) []int {
 
 	var followers []int;
 
-	row, err := dataBase.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
+	row, err := DATABASE.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
 	
 	defer row.Close()
 
@@ -849,7 +849,7 @@ func isFollowing(followed int, follower int) bool {
 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
 	// people who followed is followingg..
 
-	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
+	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
 	
 	//  CREATE TABLE FOLLOWERS (
  	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,

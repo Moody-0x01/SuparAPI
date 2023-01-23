@@ -387,3 +387,59 @@ func UnfollowRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
 	// notImplemented(c);
 }
+
+func GetUserDiscussionsRoute(c *gin.Context) { 
+	var validation models.ValidationStructure;
+	c.BindJSON(&validation);
+	if validation.Uuid == 0 || isEmpty(validation.Token) {
+		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | uuid is Missing"))
+		return
+	}
+
+	AccessToken, Ok := crypto.GetTokenFromJwt(validation.Token)
+
+	if Ok {
+
+		// TODO get all the discussions !
+		Response_t := database.GetUserDiscussions(validation.Uuid, AccessToken);
+		c.JSON(http.StatusOK, Response_t)
+		return
+	}
+
+	c.JSON(http.StatusOK, models.MakeServerResponse(401, "Not authorized!"))
+}
+
+func GetUserDiscussionByIdRoute(c *gin.Context) {
+	var validation models.ValidationStructure;
+	c.BindJSON(&validation);
+
+	if validation.Uuid == 0 || isEmpty(validation.Token) || validation.ConvId == 0 {
+		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | uuid is Missing"))
+		return
+	}
+
+	AccessToken, Ok := crypto.GetTokenFromJwt(validation.Token)
+
+	if Ok {
+		Response_t := database.GetDiscussionById(validation.Uuid, AccessToken, validation.ConvId)
+		c.JSON(http.StatusOK, Response_t);
+		return
+	}
+
+	c.JSON(http.StatusOK, models.MakeServerResponse(401, "Not authorized!"))
+}
+
+func NewConversation(c *gin.Context) {
+	/*
+	expects:
+		{
+			topic_id: int // Who send the message.
+			other_id: int // the recv of the message.
+		}
+	*/
+
+	var md models.UMessage;
+	c.BindJSON(&md);
+	New := database.CreateNewDiscussion(md.Topic_id, md.Other_id);
+	c.JSON(http.StatusOK, models.MakeServerResponse(200, New));
+} 

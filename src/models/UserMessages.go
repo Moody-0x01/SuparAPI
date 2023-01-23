@@ -14,12 +14,19 @@ const (
 	Text  = "plain-text"
 )
 
+
+type ValidationStructure struct {
+	Token      	string      `json:"token"`
+	Uuid       	int      	`json:"uuid"`
+	ConvId 		int 		`json:"conversation_id"` // IN case we want a particular convo !
+}
+
 type Discussion struct {
 	Id_         int         `json:"id"`
 	Fpair 		int 		`json:"fpair"`
 	Spair		int 		`json:"spair"`
 	Messages 	[]UMessage 	`json:"messages"`
-	timeStamp 	time.Time   `json:"ts"`
+	TimeStamp 	time.Time   `json:"ts"`
 }
 
 type DataFrame struct {
@@ -33,14 +40,22 @@ type UMessage struct {
 	Data 					DataFrame    `json:"data"`
 	Other_id 				int 	     `json:"other_id"`
 	Topic_id 				int 	     `json:"topic_id"`
-	timeStamp 				time.Time    `json:"ts"`
+	TimeStamp 				time.Time    `json:"ts"`
+}
+
+func (m *UMessage) Log() {
+	fmt.Println("FROM: ", m.Topic_id);
+	fmt.Println("TO: ", m.Other_id);
+	fmt.Println("AT: ", time.Now());
+	fmt.Println("MSG-CONTENT: ", m.Data.Text);
+	fmt.Println("Length: ", len(m.Data.Text));
 }
 
 func NewMessage(df DataFrame, t_id int) *UMessage {
 	return &UMessage{
 		Data: df,
 		Other_id: t_id,
-		timeStamp: time.Now(),
+		TimeStamp: time.Now(),
 	}
 }
 
@@ -56,7 +71,7 @@ func NewDiscussion(fpair int, spair int, MList []UMessage) *Discussion {
 		Fpair: fpair,
 		Spair: spair,
 		Messages: MList,
-		timeStamp: time.Now(),
+		TimeStamp: time.Now(),
 	}
 }
 
@@ -108,7 +123,7 @@ TODO:
 		        ID INTEGER PRIMARY KEY AUTOINCREMENT, 
 		        Fpair INTEGER,
 				Spair INTEGER,
-				timestamp Date,
+				TimeStamp Date,
 	    	);
 			
 			

@@ -9,9 +9,9 @@ import (
 
 func GetAllNotifications(uuid int) []models.Notification {
 	var Nots []models.Notification;
-	// TODO: Get all nots from the database to be shipped to the fron-end.
+	// TODO: Get all nots from the DATABASE to be shipped to the fron-end.
 
-	row, err := dataBase.Query("SELECT ID, Text, TYPE, UUID, ACTORID, Seen, Post_id, Link FROM NOTIFICATIONS WHERE UUID=? ORDER BY ID DESC", uuid)
+	row, err := DATABASE.Query("SELECT ID, Text, TYPE, UUID, ACTORID, Seen, Post_id, Link FROM NOTIFICATIONS WHERE UUID=? ORDER BY ID DESC", uuid)
 
 	defer row.Close()
 	
@@ -32,7 +32,7 @@ func GetAllNotifications(uuid int) []models.Notification {
 
 func AddNewNotification(Entry models.Notification) {
 	// TODO: Add a new Notification using a notification structure.
-	stmt, _ := dataBase.Prepare("INSERT INTO NOTIFICATIONS(Text, TYPE, UUID, ACTORID, Seen, Post_id, Link) VALUES(?, ?, ?, ?, ?, ?, ?)")
+	stmt, _ := DATABASE.Prepare("INSERT INTO NOTIFICATIONS(Text, TYPE, UUID, ACTORID, Seen, Post_id, Link) VALUES(?, ?, ?, ?, ?, ?, ?)")
 	_, err := stmt.Exec(Entry.Text, Entry.Type, Entry.Uuid, Entry.Actorid, Entry.Seen, Entry.Post_id, Entry.Link)
 	
 	if err != nil {
@@ -43,7 +43,7 @@ func AddNewNotification(Entry models.Notification) {
 
 func SetSeenForNotification(id int) {
 	// TODO: set Seen to true (1)
-	stmt, _ := dataBase.Prepare("UPDATE NOTIFICATIONS SET Seen=1 WHERE ID=?")
+	stmt, _ := DATABASE.Prepare("UPDATE NOTIFICATIONS SET Seen=1 WHERE ID=?")
 
 	_, err := stmt.Exec(id)
 	

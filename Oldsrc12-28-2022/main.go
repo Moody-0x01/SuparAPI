@@ -89,7 +89,7 @@ func main() {
 	err, path := initializeDb();
 	
 	if err != nil {
-        fmt.Println("Error opening the database! ", err.Error())
+        fmt.Println("Error opening the DATABASE! ", err.Error())
         return
     }
 

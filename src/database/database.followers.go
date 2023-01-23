@@ -12,7 +12,7 @@ func Follow(follower_id int, followed_id int, Token string) models.Result {
 	
 	if ok {
 		if id == follower_id {
-			stmt, _ := dataBase.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
 			_, err := stmt.Exec(follower_id, followed_id)
 
 			if err != nil {
@@ -38,7 +38,7 @@ func Unfollow(follower_id int, followed_id int, Token string) models.Result {
 	if ok {
 		if id == follower_id {
 
-			stmt, _ := dataBase.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
+			stmt, _ := DATABASE.Prepare("DELETE FROM FOLLOWERS WHERE follower_id=? and followed_id=?")
 			_, err := stmt.Exec(follower_id, followed_id)
 
 			if err != nil {
@@ -60,7 +60,7 @@ func GetFollowers(followed int) []int {
 	// people who is following followed.
 	var followers []int;
 
-	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
+	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
 	
 	//  CREATE TABLE FOLLOWERS (
  	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,7 +93,7 @@ func GetFollowings(following int) []int {
 
 	var followers []int;
 
-	row, err := dataBase.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
+	row, err := DATABASE.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
 	
 	defer row.Close()
 
@@ -116,7 +116,7 @@ func IsFollowing(followed int, follower int) bool {
 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
 	// people who followed is followingg..
 
-	row, err := dataBase.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
+	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
 	
 	defer row.Close()
 

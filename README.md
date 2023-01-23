@@ -15,7 +15,7 @@ NOTE: alot of the front-end routes are locked if you are not logged in...
 - `/v2/query` used to query a specific user. if not found then an empty list is returned or an error response code.
 - `/v2/:uuid` quick user lookup by uuid.
 - `/v2/signup` making an account. then returning the token to update, delete, add and other operation regarding ur account.
-- `/v2/update` expects either a img, bio, addr or bg to be updated in the database, but also accepts a token that will be given if aut/v2henticated. if the token is not provided, the server will return error code 500.
+- `/v2/update` expects either a img, bio, addr or bg to be updated in the DATABASE, but also accepts a token that will be given if aut/v2henticated. if the token is not provided, the server will return error code 500.
 - `/v2/NewPost` add new post with token, expects a token, img, uuid, and post text. if something is not set properly it will return a response report about the error.
 - `/v2/DeletePost` deleting user post using userid, postid and jwt.
 - `/v2/comment` a route for commenting in posts and stuff.
@@ -30,7 +30,7 @@ NOTE: alot of the front-end routes are locked if you are not logged in...
 
 NOTE: an interesting update is that all endpoints are prefixed by /v2 because I added my single page app and integrated the front-end route so anything that does not have /v2 is a front-end thing that returns html. and the opposite is an api endpoint.
 
-### Database (Tables and schema.)
+### DATABASE (Tables and schema.)
 
 I have used only 2 tables just because I did not want to overcomplicate things, but more will be added as m progressing in this project.
 
@@ -52,7 +52,8 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         USER_ID INTEGER,
         Text TEXT,
-        IMG TEXT
+        IMG TEXT,
+        CreatedDate Date
     );
 
     CREATE TABLE COMMENTS (
@@ -93,14 +94,17 @@ I have used only 2 tables just because I did not want to overcomplicate things, 
 ### Files and folders
 
 - `src` The folder that holds my whole project.
-- [`src\Structures.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/Structures.go) the file that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
+- [`src\models`](https://github.com/Moody0101-X/Go_Api/blob/main/src/Structures.go) the dirs that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
 - [`src\main.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/main.go) The program entry point, it run the server.
-- [`src\routes.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/routes.go) contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
-- [`src\cryptography.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/cryptography.go) contains utility functions for crypto operations like:
+- [`src\routes`](https://github.com/Moody0101-X/Go_Api/blob/main/src/routes.go) contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
+- [`src\crypto`](https://github.com/Moody0101-X/Go_Api/blob/main/src/cryptography.go) contains utility functions for crypto operations like:
+    
     1. Decode/Encode JWT.
     2. Hash passwords
     3. generate secret token for users.
-- [`src\database.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/database.go) contains database functionality, given a global *sql.db* object to perform sqlite query.
+
+- [`src\DATABASE`](https://github.com/Moody0101-X/Go_Api/blob/main/src/DATABASE.go) contains DATABASE functionality, given a global *sql.db* object to perform sqlite queries, and I recently added a socket connection support for real time data transmition! (Updates, messages).
+
 
 ### CDN
 

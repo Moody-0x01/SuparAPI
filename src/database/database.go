@@ -11,18 +11,18 @@ import (
 
 // struct DB type {
 // 	sync.RWMutex
-// 	dataBase *sql.DB
+// 	DATABASE *sql.DB
 // }
 
 
-var dataBase *sql.DB
+var DATABASE *sql.DB
 
 // db initializer: Opens the db, then evluates a global conn variable.
 func InitializeDb(dbPath string) (error, string) {
 	
 	var err error
 
-	dataBase, err = sql.Open("sqlite3", dbPath); if err != nil {
+	DATABASE, err = sql.Open("sqlite3", dbPath); if err != nil {
 		return err, ""
 	}
 
@@ -35,7 +35,7 @@ func GetNextUID(Table string) int {
 
 	var id int;
 	
-	row, err := dataBase.Query("select MAX(ID) from " + Table);
+	row, err := DATABASE.Query("select MAX(ID) from " + Table);
 	
 	defer row.Close()
 
@@ -52,7 +52,7 @@ func GetNewPostID() int {
 
 	var id int;
 	
-	row, err := dataBase.Query("select MAX(ID) + 1 from Posts");
+	row, err := DATABASE.Query("select MAX(ID) + 1 from Posts");
 	
 	defer row.Close()
 

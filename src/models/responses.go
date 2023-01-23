@@ -14,7 +14,6 @@ package models
 // 	Data   interface{} `json:"data"`
 // }
 
-
 // func MakeSocketResp(Action string, code int, data interface{}) SocketMessage {
 	
 // 	var resp SocketMessage;

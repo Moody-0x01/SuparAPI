@@ -18,8 +18,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 		if err != nil { return models.MakeServerResponse(500, "db error, could not fetch user by token.") }
 		if uuid != FetchedUser.Id_ { return models.MakeServerResponse(401, "Not authorized!") }
 
-		stmt, _ := dataBase.Prepare("DELETE FROM POSTS WHERE ID=?")
-
+		stmt, _ := DATABASE.Prepare("DELETE FROM POSTS WHERE ID=?")
 		_, err := stmt.Exec(PostId) // Execute query.
 
 
@@ -36,7 +35,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 func GetAllPosts() []models.Post {
 	var Posts []models.Post
 
-	row, err := dataBase.Query("SELECT ID, USER_ID, Text, IMG, CreatedDate FROM POSTS ORDER BY ID DESC")
+	row, err := DATABASE.Query("SELECT ID, USER_ID, Text, IMG, CreatedDate FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
 
@@ -60,7 +59,7 @@ func GetAllPosts() []models.Post {
 
 func GetPostOwnerId(PostID int) (int, bool) {
 	var id int
-	row, err := dataBase.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
+	row, err := DATABASE.Query("SELECT USER_ID FROM POSTS WHERE ID=? ORDER BY ID DESC", PostID)
 	defer row.Close()
 	
 	if err != nil {
@@ -77,7 +76,7 @@ func GetPostOwnerId(PostID int) (int, bool) {
 func GetUserPostById(id int) []models.Post {
 	// A functions to use 
 	var Posts []models.Post
-	row, err := dataBase.Query("SELECT ID, Text, IMG, CreatedDate FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
+	row, err := DATABASE.Query("SELECT ID, Text, IMG, CreatedDate FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
 
@@ -99,7 +98,7 @@ func GetUserPostById(id int) []models.Post {
 
 func GetPostById(Post_id int) models.Post {
 	
-	row, err := dataBase.Query("SELECT ID, Text, IMG, USER_ID, CreatedDate FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
+	row, err := DATABASE.Query("SELECT ID, Text, IMG, USER_ID, CreatedDate FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
 	
 	defer row.Close()
 	
@@ -147,7 +146,7 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 
 	}
 
-	stmt, _ := dataBase.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG, CreatedDate) VALUES(?, ?, ?, datetime())")
+	stmt, _ := DATABASE.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG, CreatedDate) VALUES(?, ?, ?, datetime())")
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil { return models.MakeServerResult(false, "could not add post. err L149") }
@@ -186,7 +185,7 @@ func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwn
     if ok {
 
     	if id == uuid {
-    		stmt, _ := dataBase.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
+    		stmt, _ := DATABASE.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
 			_, err := stmt.Exec(uuid, PostId, commentText)
 
 			if err != nil {
@@ -217,7 +216,7 @@ func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result
 
 	if ok {
 		if id == uuid {
-			stmt, _ := dataBase.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -247,7 +246,7 @@ func Remove_like(uuid int, PostId int, Token string) models.Result {
 
 	if ok {
 		if id == uuid {
-			stmt, _ := dataBase.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
+			stmt, _ := DATABASE.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -275,7 +274,7 @@ func Get_comments(PostId int) []models.Comment {
 	
 	var comments []models.Comment
 
-	row, err := dataBase.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
 	
 	defer row.Close()
 
@@ -304,7 +303,7 @@ func Get_likes(PostId int) []models.Like {
 
 	var likes []models.Like
 
-	row, err := dataBase.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
 
 	defer row.Close()
 

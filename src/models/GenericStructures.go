@@ -97,6 +97,21 @@ func MakeServerResponse(code int, data interface{}) Response {
 		case []Notification:
 			Resp.Data = data.([]Notification)
 			break
+		case []Discussion:
+			Resp.Data = data.([]Discussion)
+			break
+
+		case Discussion:
+			Resp.Data = data.(Discussion)
+			break
+
+		case []UMessage:
+			Resp.Data = data.([]UMessage)
+			break
+
+		case UMessage:
+			Resp.Data = data.(UMessage)
+			break
 
 		case int:
 			Resp.Data = data.(int)

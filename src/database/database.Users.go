@@ -33,7 +33,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (models.User, model
 	if CheckUser(Email) {
 
 		var user models.User
-		row, err := dataBase.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
+		row, err := DATABASE.Query("SELECT PASSWORDHASH FROM USERS WHERE EMAIL=?", Email)
 		
 		defer row.Close()
 
@@ -49,7 +49,7 @@ func AuthenticateUserByEmailAndPwd(Pwd string, Email string) (models.User, model
 		}
 		
 		if crypto.Sha256_(Pwd) == pwdHash {
-			row, err := dataBase.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+			row, err := DATABASE.Query("SELECT ID, EMAIL, USERNAME, TOKEN, IMG, BG, BIO, ADDR FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 
 			defer row.Close()
 
@@ -84,7 +84,7 @@ func GetUserById(id int) models.AUser {
 	
 	var User models.AUser
 
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
+	row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE ID=? ORDER BY ID DESC", id)
 	defer row.Close()
 	
 	if err != nil {
@@ -104,7 +104,7 @@ func GetUserById(id int) models.AUser {
 func GetUserByToken(Token string) (models.User, error) {
 	
 	var User_ models.User
-	row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
+	row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE TOKEN=? ORDER BY ID DESC", Token)
 	
 	defer row.Close()
 
@@ -126,7 +126,7 @@ func GetUsers(uuid interface{}) []models.AUser {
 	var Users []models.AUser
 	switch uuid.(type) {
 		case int:
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 			defer row.Close()
 			
 			if err != nil {
@@ -148,7 +148,7 @@ func GetUsers(uuid interface{}) []models.AUser {
 
 		case bool:
 
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 			defer row.Close()
 			
 			if err != nil {
@@ -183,7 +183,7 @@ func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
 
 	switch uuid.(type) {
 		case int:
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
 			defer row.Close()
 
@@ -205,7 +205,7 @@ func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
 
 		case bool:
 			
-			row, err := dataBase.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
+			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
 			defer row.Close()
 
@@ -245,7 +245,7 @@ func GetUserByJWToken(JWToken string) (models.User, bool) {
 
 func GetUserIdByToken(t string) (int, bool) {
 	var id int
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE TOKEN=?", t)
 	defer row.Close()
 
 	if err != nil {
@@ -262,7 +262,7 @@ func GetUserIdByToken(t string) (int, bool) {
 
 func CheckUser(Email string) bool {
 		
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE EMAIL=? ORDER BY ID DESC", Email)
 	defer row.Close()
 	var u []int;
 
@@ -305,7 +305,7 @@ func AddUser(user models.User) models.Response {
 
 		/*------------Add To cdn-------------*/
 
-		stmt, _ := dataBase.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
+		stmt, _ := DATABASE.Prepare("INSERT INTO USERS(EMAIL, USERNAME, PASSWORDHASH, TOKEN, IMG, BIO, BG, ADDR) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, img, user.Bio, bg, user.Address)
 		
 		if err != nil {
@@ -337,7 +337,7 @@ func AddUser(user models.User) models.Response {
 func GetuuidByToken(Token string) (int, bool) {
 	
 	var uuid int
-	row, err := dataBase.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
+	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
 	
 	defer row.Close()
 
@@ -405,7 +405,7 @@ func UpdateUser(field string, newValue string, Token string) models.Result {
 
 	if ok {
 
-		stmt, _ := dataBase.Prepare(Query)
+		stmt, _ := DATABASE.Prepare(Query)
 		_, err := stmt.Exec(newValue, Token)
 
 		if err != nil {

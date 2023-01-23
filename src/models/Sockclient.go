@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	// "strconv"
 	"sync"
-	// "github.com/Moody0101-X/Go_Api/database"
+	// "github.com/Moody0101-X/Go_Api/DATABASE"
 )
 
 var ClientPool ClientHub;

@@ -51,6 +51,8 @@ func run() {
 	router.POST("/v2/login", routes.Login) // login and get a token for the updating/creation/deletion of personal data.
 	router.POST("/v2/update", routes.Update) // Updating user's information by token
 	router.POST("/v2/NewPost", routes.NewPost) // adding a post by token.
+	router.POST("/v2/chat/NewConversation", routes.NewConversation) // adding a post by token.
+	
 	router.POST("/v2/DeletePost", routes.DeletePost) // Deleting a post by token
 	router.POST("/v2/signup", routes.SignUp) // Making new account
 	router.POST("/v2/comment", routes.AddCommentRoute) // For likes
@@ -58,13 +60,17 @@ func run() {
 	router.POST("/v2/like/remove", routes.RemoveLikeRoute)
 	router.POST("/v2/follow", routes.FollowRoute)
 	router.POST("/v2/unfollow", routes.UnfollowRoute)
-	
+	router.POST("/v2/chat/getUserConversations", routes.GetUserDiscussionsRoute) // Get by Token this is why it is a post!!
+	router.POST("/v2/chat/getUserConversationById", routes.GetUserDiscussionByIdRoute)
+
 	// Get routes.
 	router.GET("/v2/getUserPosts", routes.GetUserPostsRoute) // gettting user post by id
 	router.GET("/v2/GetAllPosts", routes.GetAllPostsRoute) // getting all posts
 	router.GET("/v2/getPostById/:pid", routes.GetPostByPostidRoute)
 	router.GET("/v2/getPostCommentsById/:pid", routes.GetPostComments)
 	router.GET("/v2/getPostLikesById/:pid", routes.GetPostLikes)
+
+	
 
 	router.GET("/v2/query", routes.GetUsersRoute) // user look up by name
 	router.GET("/v2/getUser", routes.GetUserByIdRoute) // get user by id
