@@ -48,10 +48,14 @@ func GetNextUID(Table string) int {
 }
 
 func GetNewPostID() int {
+	return GetLastID("Posts");
+}
+
+func GetLastID(Table string) int {
 
 	var id int;
 	
-	row, err := DATABASE.Query("select MAX(ID) + 1 from Posts");
+	row, err := DATABASE.Query("select MAX(ID) from " + Table);
 	
 	defer row.Close()
 
@@ -63,7 +67,6 @@ func GetNewPostID() int {
 
 	return id;
 }
-
 
 func CheckCdnLink(link string) string {
 	return strings.ReplaceAll(link, "http://localhost:8500", models.CDN_API);

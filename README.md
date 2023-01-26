@@ -27,6 +27,9 @@ NOTE: alot of the front-end routes are locked if you are not logged in...
 - `/v2/getFollowings/:uuid` getting the followings of a user. by uuid..
 - `/v2/getComments/:pid` a route to get comments by pid (post id).
 - `/v2/getLikes/:pid` a route to get the likes of a certain post by id.
+- `/v2/chat/getUserConversations` a route to a user's conversations data, as an array (which will be changed due to some technical reasons)
+- `/v2/chat/getUserConversationById` a route that return one conversation by its id
+- `/v2/WSoc` a route that handles tcp connections via a socket that connects from `ws://host:port/v2/WSoc`
 
 NOTE: an interesting update is that all endpoints are prefixed by /v2 because I added my single page app and integrated the front-end route so anything that does not have /v2 is a front-end thing that returns html. and the opposite is an api endpoint.
 
@@ -34,76 +37,23 @@ NOTE: an interesting update is that all endpoints are prefixed by /v2 because I 
 
 I have used only 2 tables just because I did not want to overcomplicate things, but more will be added as m progressing in this project.
 
-```sql
-
-    CREATE TABLE USERS (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT, 
-        EMAIL TEXT, 
-        USERNAME TEXT, 
-        PASSWORDHASH TEXT, 
-        TOKEN TEXT, 
-        IMG TEXT DEFAULT null,
-        BG TEXT DEFAULT null,
-        BIO TEXT DEFAULT null,
-        ADDR TEXT DEFAULT null
-    );
-
-    CREATE TABLE POSTS (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        USER_ID INTEGER,
-        Text TEXT,
-        IMG TEXT,
-        CreatedDate Date
-    );
-
-    CREATE TABLE COMMENTS (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        uuid INTEGER,
-        post_id integer,
-        comment_text TEXT
-    );
-
-    CREATE TABLE LIKES (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        uuid INTEGER,
-        post_id INTEGER
-    );
-
-
-    CREATE TABLE FOLLOWERS (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        followed_id INTEGER
-        follower_id INTEGER
-    );
-    
-    CREATE TABLE NOTIFICATIONS (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        Text TEXT,
-        TYPE INTEGER,
-        UUID INTEGER,
-        ACTORID INTEGER,
-        Seen INTEGER,
-        Post_id INTEGER,
-        Link TEXT
-    )
-
-    
-```
+- Check [`src\script.sql`](https://github.com/Moody0101-X/Go_Api/blob/main/src\script.sql)
 - Note: Adding more data fields and appropriate type is kinda crucial, but this is it for now.
 
 ### Files and folders
 
 - `src` The folder that holds my whole project.
-- [`src\models`](https://github.com/Moody0101-X/Go_Api/blob/main/src/Structures.go) the dirs that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
+- [`src\models`](https://github.com/Moody0101-X/Go_Api/blob/main/src/models) the dirs that contains all the models to be used in parsing and encapsulating data exmp => User, Post, Response, LoginForm....
+
 - [`src\main.go`](https://github.com/Moody0101-X/Go_Api/blob/main/src/main.go) The program entry point, it run the server.
-- [`src\routes`](https://github.com/Moody0101-X/Go_Api/blob/main/src/routes.go) contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
-- [`src\crypto`](https://github.com/Moody0101-X/Go_Api/blob/main/src/cryptography.go) contains utility functions for crypto operations like:
+- [`src\routes`](https://github.com/Moody0101-X/Go_Api/blob/main/src/routes) contains routing functions that take the *gin.context* and handles the requests whether it is a POST or a GET request.
+- [`src\crypto`](https://github.com/Moody0101-X/Go_Api/blob/main/src/crypto) contains utility functions for crypto operations like:
     
     1. Decode/Encode JWT.
     2. Hash passwords
     3. generate secret token for users.
 
-- [`src\DATABASE`](https://github.com/Moody0101-X/Go_Api/blob/main/src/DATABASE.go) contains DATABASE functionality, given a global *sql.db* object to perform sqlite queries, and I recently added a socket connection support for real time data transmition! (Updates, messages).
+- [`src\database`](https://github.com/Moody0101-X/Go_Api/blob/main/src/database) contains DATABASE functionality, given a global *sql.db* object to perform sqlite queries, and I recently added a socket connection support for real time data transmition! (Updates, messages).
 
 
 ### CDN
@@ -132,3 +82,74 @@ const addPOST string = api + "/Zimg/NewPostImg"
 
 - to see the front-end app that is using this api go [Here](https://github.com/Moody0101-X/SM_app)
 
+### Issues.
+
+## Front-end
+    - Messy code all over the app.
+    - Non-standarized Ui main components.
+    - Responsible for parsing the data once it comes in, which is not that convinient I guess, we need to do everything in the backend then return the needed result so the ui has one last thing to do, change state.
+    - Refactoring needed
+    
+## Back-end
+    - Response is not standard, we need new data struct to return a parsed and more organized data for big data objects
+    
+    ### Example
+```javascript
+    // Instead of this ob.
+    const c = [
+            {
+                id_:0,
+                msgs: [{...}],
+                ts:new Date(),
+            }, {
+                id_:1,
+                msgs: [{...}],
+                msgCount: msgs.length,
+                ts:new Date(),
+            }
+        ]
+
+
+    // We need this.
+    const c1 = {
+        0: {
+            msgs: [{...}],
+            msgCount: msgs.length,
+            ts:new Date(),
+        },
+        1: {
+            msgs: [{...}],
+            msgCount: msgs.length,
+            ts:new Date(),
+        }
+    }
+
+    // The purpose is obvs so we just prevent this code
+    c.map((conv) => {
+        
+        if(conv.id_ === target) {
+            // DO something if the targeted conv is found.    
+        }
+    })
+
+    // Istead.
+    const f = (conversation) => {
+        // DO something if the targeted conv is found.
+    }
+    const targetedC = c[target]
+    // Then operate.. change state or append, do whatever but it is just faster, way faster than maping.
+    f(targetedC)
+
+    /*
+    
+    But idk, it just makes more sense, because I am already using maps all over the place..
+    
+    */
+
+```
+    - Refactoring needed
+
+## CDN
+    - More file formats (mp3, mp4, mkv-maybe....).
+    - needs more effecient design.
+    - Refactoring needed

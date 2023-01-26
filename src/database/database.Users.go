@@ -15,15 +15,15 @@ func AuthenticateUserJWT(UserJWT string) models.Response {
         User_, err := GetUserByToken(Token)
         if err != nil {
             // a db error.
-            return models.MakeServerResponse(500, "Db Error. (line 108).")
+            return models.MakeGenericServerResponse(500, "Db Error. (line 108).")
         } else {
             // Returns the user if everything was alright.
-            return models.MakeServerResponse(200, User_)
+            return models.MakeGenericServerResponse(200, User_)
         }
 
     } else {
         // JWT error
-        return models.MakeServerResponse(500, "server could not decode the token. (line 117)")
+        return models.MakeGenericServerResponse(500, "server could not decode the token. (line 117)")
     }
 }
 
@@ -293,13 +293,13 @@ func AddUser(user models.User) models.Response {
 		ok, img := cdn.AddUserAvatarToCdn(uuid, user.Img)
 
 		if !ok {
-			return models.MakeServerResponse(500, "cdn error, could not add avatar.")
+			return models.MakeGenericServerResponse(500, "cdn error, could not add avatar.")
 		}
 
 		ok, bg := cdn.AddUserBackgroundToCdn(uuid, user.Bg)
 
 		if !ok {
-			return models.MakeServerResponse(500, "cdn error, could not add background.")
+			return models.MakeGenericServerResponse(500, "cdn error, could not add background.")
 		}
 
 
@@ -309,29 +309,29 @@ func AddUser(user models.User) models.Response {
 		_, err := stmt.Exec(user.Email, user.UserName, user.PasswordHash, Token, img, user.Bio, bg, user.Address)
 		
 		if err != nil {
-			return models.MakeServerResponse(500, "Could not add to db.")
+			return models.MakeGenericServerResponse(500, "Could not add to db.")
 		}
 
 		FetchedUser, err := GetUserByToken(Token)
 
 		if err != nil {
-			return models.MakeServerResponse(500, "Could not get created user from db. L288")
+			return models.MakeGenericServerResponse(500, "Could not get created user from db. L288")
 		} else {
 			
 			JWT, err := crypto.StoreTokenInJWT(Token)
 			
 			if err != nil {
 				fmt.Println(err)
-				return models.MakeServerResponse(500, "The server had a problem making the jwt token.")
+				return models.MakeGenericServerResponse(500, "The server had a problem making the jwt token.")
 			}
 
 			FetchedUser.Token = JWT;
-			return models.MakeServerResponse(200, FetchedUser) // Success.
+			return models.MakeGenericServerResponse(200, FetchedUser) // Success.
 		}
 
 	}
 
-	return models.MakeServerResponse(500, "This user already exists..")
+	return models.MakeGenericServerResponse(500, "This user already exists..")
 }
 
 func GetuuidByToken(Token string) (int, bool) {

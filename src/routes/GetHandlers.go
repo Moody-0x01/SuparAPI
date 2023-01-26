@@ -8,23 +8,12 @@ import (
 	"github.com/Moody0101-X/Go_Api/database"
 )
 /* 
-TODO:
-
-	- Getter for the conversation
-
-	BLUEPRINT:	
-		
-		func name(convo_id) {
-			""" Get the conversation by conversation id !"""
-			return convo(
-				convo_id
-			);
-		}
+// TODO: Modify the post data strcuture to Get all the neccessiry element of a particular post.
 */
 
 func GetAllPostsRoute(c *gin.Context) {
 	All := database.GetAllPosts()
-	var res models.Response = models.MakeServerResponse(200, All)
+	var res models.Response = models.MakeGenericServerResponse(200, All)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -33,53 +22,57 @@ func GetUserPostsRoute(c *gin.Context) {
 	id_, err := strconv.Atoi(id)
 
 	if err != nil {
-		c.JSON(500, models.MakeServerResponse(0, "Server error"))
+		c.JSON(500, models.MakeGenericServerResponse(0, "Server error"))
 		return 
 	}
 
-	var UserPosts []models.Post = database.GetUserPostById(id_)
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, UserPosts))
+	UserPosts := database.GetUserPostById(id_)
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, UserPosts))
 }
+
 func GetUsersRoute(c *gin.Context) {
 	var q string = GetFieldFromContext(c, "q")
 	var uuid string = GetFieldFromContext(c, "uuid")
 	var uuid_ int;
+	
 	var flag bool = false;
+	
 	if !isEmpty(uuid) {
 		flag = true;
 		temp, err := strconv.Atoi(uuid)
 		uuid_ = temp
 
 		if err != nil {
-			c.JSON(http.StatusOK, models.MakeServerResponse(400, "make sure that uuid is a number."))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "make sure that uuid is a number."))
 			return
 		}
 	}
 
 	var Users []models.AUser;
-
+	
 	if q != "" {
 		if flag {
 			Users = database.GetUsersByQuery(q, uuid_)
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, Users))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Users))
 			return
 		} else {
 			Users = database.GetUsersByQuery(q, flag)	
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, Users))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Users))
 			return
 		}
 	} else {
 		if flag {
 			Users = database.GetUsers(uuid_)
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, Users))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Users))
 			return
 		} else {
 			Users = database.GetUsers(flag)
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, Users))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Users))
 			return
 		}
 	}
 }
+
 func GetUserByIdRoute(c *gin.Context) {
 	
 	var uuid string = GetFieldFromContext(c, "uuid")
@@ -88,7 +81,7 @@ func GetUserByIdRoute(c *gin.Context) {
 	uuid_, err := strconv.Atoi(uuid)
 
 	if err != nil {
-		c.JSON(500, models.MakeServerResponse(400, "uuid should be a number"))
+		c.JSON(500, models.MakeGenericServerResponse(400, "uuid should be a number"))
 		return 
 	}
 
@@ -98,45 +91,48 @@ func GetUserByIdRoute(c *gin.Context) {
 		user_ID, err := strconv.Atoi(user_id)
 
 		if err != nil {
-			c.JSON(500, models.MakeServerResponse(400, "user get parameter should be a number for this request to successed"))
+			c.JSON(500, models.MakeGenericServerResponse(400, "user get parameter should be a number for this request to successed"))
 			return 
 		}
 
 		User.IsFollowed = database.IsFollowing(User.Id_, user_ID)
 	}
 
-	var res models.Response = models.MakeServerResponse(200, User)
+	var res models.Response = models.MakeGenericServerResponse(200, User)
 	
 	c.JSON(http.StatusOK, res)
 }
+
 func GetPostComments(c *gin.Context) {
 	var pid string = c.Param("pid")
 	
 	pid_, err := strconv.Atoi(pid)
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an integer"))
 		return 
 	}
 	
 	var comments []models.Comment = database.Get_comments(pid_);
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, comments))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, comments))
 }
+
 func GetPostLikes(c *gin.Context) {
 	var pid string = c.Param("pid")
 	
 	pid_, err := strconv.Atoi(pid)
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an integer"))
 		return 
 	}
 	
 	var likes []models.Like = database.Get_likes(pid_);
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, likes))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, likes))
 }
+
 func GetUserFollowingsById(c *gin.Context) {
 	
 	var uuid string = c.Param("uuid")
@@ -144,15 +140,16 @@ func GetUserFollowingsById(c *gin.Context) {
 	uuid_, err := strconv.Atoi( uuid )
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an integer"))
 		return
 	}
 
 	
 	var followers []int = database.GetFollowings(uuid_)
 	
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, followers))
 }
+
 func GetUserFollowersById(c *gin.Context) {
 	
 	var uuid string = c.Param("uuid")
@@ -160,15 +157,14 @@ func GetUserFollowersById(c *gin.Context) {
 	uuid_, err := strconv.Atoi( uuid )
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an integer"))
 		return
 	}
 
 	var followers []int = database.GetFollowers(uuid_)
 	
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, followers))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, followers))
 }
-// func GetUserByIdRoute(c *gin.Context) int { return }
 
 func GetPostByPostidRoute(c *gin.Context) {
 	var pid string = c.Param("pid")
@@ -176,13 +172,13 @@ func GetPostByPostidRoute(c *gin.Context) {
 	pid_, err := strconv.Atoi(pid)
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an pid"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an pid"))
 		return
 	}
 	
 	var Post_ models.Post = database.GetPostById(pid_)
 	
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, Post_))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Post_))
 }
 
 func GetAllNotificationsRoute(c *gin.Context) {
@@ -191,12 +187,12 @@ func GetAllNotificationsRoute(c *gin.Context) {
 	uuid_, err := strconv.Atoi( uuid )
 
 	if err != nil {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "bad request, make sure post_id is an integer"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "bad request, make sure post_id is an integer"))
 		return
 	}
 
 	var Notifications []models.Notification = database.GetAllNotifications(uuid_)
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, Notifications))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, Notifications))
 }
 

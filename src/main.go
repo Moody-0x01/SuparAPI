@@ -44,7 +44,6 @@ func run() {
 	router.Static("/static", "./public/static")
 	router.Static("/img", "./public/img")
 	router.Static("/Global.css", "./public/Global.css")
-
 	router.LoadHTMLGlob("public/*.html")
 	
 	// POST routes.

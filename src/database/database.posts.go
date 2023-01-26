@@ -13,28 +13,27 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 	ownerId, ok := GetPostOwnerId(PostId);
 
 	if ok {
-
-		if uuid != ownerId { return models.MakeServerResponse(401, "Not authorized!") }
-		if err != nil { return models.MakeServerResponse(500, "db error, could not fetch user by token.") }
-		if uuid != FetchedUser.Id_ { return models.MakeServerResponse(401, "Not authorized!") }
+		if uuid != ownerId { return models.MakeGenericServerResponse(401, "Not authorized!") }
+		if err != nil { return models.MakeGenericServerResponse(500, "db error, could not fetch user by token.") }
+		if uuid != FetchedUser.Id_ { return models.MakeGenericServerResponse(401, "Not authorized!") }
 
 		stmt, _ := DATABASE.Prepare("DELETE FROM POSTS WHERE ID=?")
 		_, err := stmt.Exec(PostId) // Execute query.
 
 
 		if err != nil {
-			return models.MakeServerResponse(500, "Could not delete the post.")
+			return models.MakeGenericServerResponse(500, "Could not delete the post.")
 		}
 
-		return models.MakeServerResponse(200, "success")
+		return models.MakeGenericServerResponse(200, "success")
 	}
 
-	return models.MakeServerResponse(401, "Not authorized!")	
+	return models.MakeGenericServerResponse(401, "Not authorized!")	
 }
 
-func GetAllPosts() []models.Post {
-	var Posts []models.Post
-
+func GetAllPosts() map[int]models.Post {
+	
+	Posts := make(map[int]models.Post);
 	row, err := DATABASE.Query("SELECT ID, USER_ID, Text, IMG, CreatedDate FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
@@ -44,17 +43,22 @@ func GetAllPosts() []models.Post {
 		return Posts
 	}
 
-	var temp models.Post
+	var tempPost models.Post
 
 	for row.Next() {
-		row.Scan(&temp.Id_, &temp.Uid_,&temp.Text, &temp.Img, &temp.Date)
-		temp.User_ = GetUserById(temp.Uid_)
-		temp.Img = CheckCdnLink(temp.Img); // Fix for the api cdn images...
-		Posts = append(Posts, temp)
+		row.Scan(&tempPost.Id_, &tempPost.Uid_,&tempPost.Text, &tempPost.Img, &tempPost.Date);
+		tempPost.User_ = GetUserById(tempPost.Uid_);
+		tempPost.Img = CheckCdnLink(tempPost.Img); // Fix for the api cdn images...
+		
+		tempPost.PostLikes = Get_likes(tempPost.Id_);
+		tempPost.LikesCount = len(tempPost.PostLikes);
+		tempPost.PostComments = Get_comments(tempPost.Id_)
+		tempPost.CommentsCount = len(tempPost.PostComments);
+		
+		Posts[tempPost.Id_] = tempPost;
 	}
-	
-	// fmt.Println(Posts)
-	return Posts
+
+	return Posts;
 }
 
 func GetPostOwnerId(PostID int) (int, bool) {
@@ -73,9 +77,10 @@ func GetPostOwnerId(PostID int) (int, bool) {
 	return id, true
 }
 
-func GetUserPostById(id int) []models.Post {
+func GetUserPostById(id int) map[int]models.Post {
 	// A functions to use 
-	var Posts []models.Post
+	Posts := make(map[int]models.Post);
+	
 	row, err := DATABASE.Query("SELECT ID, Text, IMG, CreatedDate FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
@@ -85,12 +90,18 @@ func GetUserPostById(id int) []models.Post {
 		return Posts
 	}
 
-	var temp models.Post
+	var tempPost models.Post
 
 	for row.Next() {
-		row.Scan(&temp.Id_, &temp.Text, &temp.Img, &temp.Date);
-		temp.Img = CheckCdnLink(temp.Img);
-		Posts = append(Posts, temp);
+		row.Scan(&tempPost.Id_, &tempPost.Text, &tempPost.Img, &tempPost.Date);
+		tempPost.Img = CheckCdnLink(tempPost.Img);
+
+		tempPost.PostLikes = Get_likes(tempPost.Id_);
+		tempPost.LikesCount = len(tempPost.PostLikes);
+		tempPost.PostComments = Get_comments(tempPost.Id_)
+		tempPost.CommentsCount = len(tempPost.PostComments);
+		
+		Posts[tempPost.Id_] = tempPost;
 	}
 
 	return Posts
@@ -113,6 +124,10 @@ func GetPostById(Post_id int) models.Post {
 		row.Scan(&PostOB.Id_, &PostOB.Text, &PostOB.Img, &PostOB.Uid_, &PostOB.Date);
 		PostOB.Img = CheckCdnLink(PostOB.Img);
 		PostOB.User_ = GetUserById(PostOB.Uid_);
+		PostOB.PostLikes = Get_likes(Post_id);
+		PostOB.LikesCount = len(PostOB.PostLikes);
+		PostOB.PostComments = Get_comments(Post_id)
+		PostOB.CommentsCount = len(PostOB.PostComments);
 	}
 
 	return PostOB
@@ -127,19 +142,15 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 
 			Because When we want to delete a certain post we need to verify if it is Your post!
 			also, the id is the key of the UI post comp, so.. making alot of problems in the tree?
-
-			Solution Idea1 has failed -> GetNextUID
 			Solved, what a dumbass I was getting the maximum id before actually adding a new Post!!!!!!!!!!
 
 	*/
 
 	var pid int = -1;
-
 	if !isEmpty(Img) {
-		var ok bool;
 		
+		var ok bool;
 		ok, Img = cdn.AddPostImage(uuid, Img, pid) // (bool, string)
-	
 		if !ok {
 			return models.MakeServerResult(false, "could not add post img to cdn.. err L480")
 		}
@@ -156,30 +167,45 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 	if pid == 0 { return models.MakeServerResult(false, "could not get pid. err L154") }
 
 	// TODO: Broadcast the post Msg...
-	
 	var PostObj models.Post;
+	
 	PostObj.Id_ = pid;
 	PostObj.Uid_ = uuid;
 	PostObj.Text = Text;
 	PostObj.Img = CheckCdnLink(Img); 
 	PostObj.Date = time.Now();
-
+	PostObj.PostLikes = Get_likes(PostObj.Id_);
+	PostObj.LikesCount = len(PostObj.PostLikes);
+	PostObj.PostComments = Get_comments(PostObj.Id_)
+	PostObj.CommentsCount = len(PostObj.PostComments);
 	PostObj.User_ = GetUserById(PostObj.Uid_);
 
 	SockMsg := PostObj.EncodeToSocketResponse();
-	
 	models.ClientPool.BroadCastJSON(SockMsg, uuid)
-
 	return models.MakeServerResult(true, pid)
 }
 
-func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwnerId int) models.Result {
-	// ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    // uuid INTEGER,
-    // post_id integer,
-    // comment_text TEXT
-    // TODO: add new id that specifies which user owns the post u liked or comminted on.
 
+// TODO func Remove_comment(commentId).
+// TODO Send the comment/Like event to Users.
+func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwnerId int) models.Result {
+/*
+type Comment struct {
+	Id_          int `json:"id_"`
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	Text		 string `json:"text"`
+	User_		 AUser `json:"user"` // Filled when fitching comments.
+}
+
+type Like struct {
+	Id_          int `json:"id_"`
+	Post_id		 int `json:"post_id"`
+	Uuid		 int `json:"uuid"`
+	User_		 AUser `json:"user"` // Filled when fitching comments.
+}
+
+*/
     id, ok := GetUserIdByToken(Token);
 
     if ok {
@@ -197,11 +223,22 @@ func Add_comment(uuid int, commentText string, PostId int, Token string, PostOwn
 			Notification.Post_id = PostId;
 	    	pushNotificationForUser(Notification, " commented on your post!")
 
+	    	var c models.Comment;
+			
+			c.Id_ = GetLastID("COMMENTS");
+			c.Post_id = PostId;
+			c.Uuid = uuid;
+			c.Text = commentText;
+			c.User_ = GetUserById(uuid);
+			
+			Message := c.EncodeToSocketResponse();
+			models.ClientPool.BroadCastJSON(Message, uuid);
+
 			return models.MakeServerResult(true, "success")
-    	}	
+
+    	}
 		
 		return models.MakeServerResult(false, "token does not match this user, please make sure you are logged in.")
-
     }
 
     return models.MakeServerResult(false, "coult not get user id.")
@@ -227,7 +264,17 @@ func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result
 			var Notification models.Notification = models.NewNot(models.LIKE, PostOwnerId, uuid);
 			Notification.Post_id = PostId;
 	    	pushNotificationForUser(Notification, " liked your post!")
-	    	fmt.Println("Notification was pushed..")
+	    	
+	    	var like models.Like;
+
+			like.Id_ = GetLastID("LIKES");
+			like.Post_id = PostId;
+			like.Uuid = uuid;
+			like.User_ = GetUserById(uuid);
+			
+			Message := like.EncodeToSocketResponse();
+			models.ClientPool.BroadCastJSON(Message, uuid);
+
 			return models.MakeServerResult(true, "success")	
 		}
 
@@ -283,12 +330,12 @@ func Get_comments(PostId int) []models.Comment {
 		return comments
 	}
 
-	var temp models.Comment
+	var tempComment models.Comment
 
 	for row.Next() {
-		row.Scan(&temp.Id_, &temp.Uuid, &temp.Text);
-		temp.User_ = GetUserById(temp.Uuid)
-		comments = append(comments, temp)
+		row.Scan(&tempComment.Id_, &tempComment.Uuid, &tempComment.Text);
+		tempComment.User_ = GetUserById(tempComment.Uuid)
+		comments = append(comments, tempComment)
 	}
 
 	return comments
@@ -312,12 +359,12 @@ func Get_likes(PostId int) []models.Like {
 		return likes
 	}
 
-	var temp models.Like
+	var tempLike models.Like
 	for row.Next() {
 
-	row.Scan(&temp.Id_,&temp.Uuid)
-		temp.User_ = GetUserById(temp.Uuid)
-		likes = append(likes, temp)
+	row.Scan(&tempLike.Id_,&tempLike.Uuid)
+		tempLike.User_ = GetUserById(tempLike.Uuid)
+		likes = append(likes, tempLike)
 	}
 
 	return likes

@@ -22,17 +22,24 @@ type Response struct {
 
 
 type SocketMessage struct {
-	Code   int    `json:"code"`
-	Action string `json:"action"`
+	Code   int         `json:"code"`
+	Action int         `json:"action"`
 	Data   interface{} `json:"data"`
 }
 
 
-func MakeSocketResp(Action string, code int, data interface{}) SocketMessage {
+func MakeGenericServerResponse(code int, data interface{}) Response {
+	return Response{
+		Code: code,
+		Data: data,
+	}
+}
+
+func MakeSocketResp(Enum int, code int, data interface{}) SocketMessage {
 	
 	var resp SocketMessage;
 	resp.Code = code;
-	resp.Action = Action;
+	resp.Action = Enum;
 	
 	switch data.(type) {
 		

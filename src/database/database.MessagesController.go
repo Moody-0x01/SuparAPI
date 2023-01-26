@@ -89,13 +89,25 @@ func SendMessage(client *models.Client, Message models.UMessage) {
 
 func GetUserDiscussions(User_id int, Token string) models.Response {
 
-	var Discussions []models.Discussion;
+	Discs := make(map[int]models.Discussion);
+	
+	/*		
+		
+		[
+			{...},
+			{...},
+		] -> {
+			i: {...},
+			j: {...},
+		}
+
+	*/
 	
 	id, ok := GetUserIdByToken(Token)
 	
 	if ok {
 		if id == User_id {
-			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE Fpair=? OR Spair=? ORDER BY ID ASC", User_id, User_id);
+			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE Fpair=? OR Spair=? ORDER BY ID DESC", User_id, User_id);
 			
 			if err != nil {
 				return models.MakeServerResponse(500, "Internal serevr error");
@@ -103,26 +115,29 @@ func GetUserDiscussions(User_id int, Token string) models.Response {
 			
 			defer row.Close();
 			
-			var temp models.Discussion;
+			var tempDisc models.Discussion;
 
 			for row.Next() {
+				
 				// Fpair, Spair, timestamp
-				row.Scan(&temp.Id_, &temp.Fpair, &temp.Spair, &temp.TimeStamp);
-				temp.Messages = GetMessagesByConvId(temp.Id_);
-				Discussions = append(Discussions, temp);
+				row.Scan(&tempDisc.Id_, &tempDisc.Fpair, &tempDisc.Spair, &tempDisc.TimeStamp);
+				tempDisc.Messages = GetMessagesByConvId(tempDisc.Id_);
+				tempDisc.MessageCount = len(tempDisc.Messages);
+				// A slight modification.
+
+				Discs[tempDisc.Id_] = tempDisc;
 			}
 
-			return models.MakeServerResponse(200, Discussions);
+			return models.MakeGenericServerResponse(200, Discs);
 		}
 	}
 
-	return models.MakeServerResponse(401, "Not authorized!")
+	return models.MakeGenericServerResponse(401, "Not authorized!")
 }
 
 func GetMessagesByConvId(id int) []models.UMessage {
 	
 	var Messages []models.UMessage;
-
 	row, err := DATABASE.Query("SELECT ID, Msg, MsgType, topic_id, other_id, ts FROM MESSAGES WHERE Coversation_id=? ORDER BY ID ASC", id);
 	
 	if err != nil {	
@@ -171,4 +186,17 @@ func GetDiscussionById(uuid int, Token string, conversation_id int) models.Respo
 	}
 
 	return models.MakeServerResponse(401, "Not authorized!")
+}
+
+
+func MarkMessageAsSeen(id int) {
+
+	// TODO: set Seen to true (1)
+	stmt, _ := DATABASE.Prepare("UPDATE MESSAGES SET Seen=1 WHERE ID=?")
+	_, err := stmt.Exec(id)
+
+	if err != nil {
+		fmt.Println("There was an error while adding the notification seen flag")
+		fmt.Println(err)
+	}
 }

@@ -23,15 +23,15 @@ func Login(c *gin.Context) {
 			user, err := database.AuthenticateUserByEmailAndPwd(LoginForm.Password, LoginForm.Email)
 			
 			if err.Ok {
-				resp = models.MakeServerResponse(200, user)
+				resp = models.MakeGenericServerResponse(200, user)
 			} else {
 
-				resp = models.MakeServerResponse(500, err.Data)
+				resp = models.MakeGenericServerResponse(500, err.Data)
 				fmt.Println("", resp.Data)
 			}
 
 		} else {
-			resp = models.MakeServerResponse(500, "Missing request attributes, Email or password not specified.")
+			resp = models.MakeGenericServerResponse(500, "Missing request attributes, Email or password not specified.")
 		}
 	}
 
@@ -44,7 +44,7 @@ func SignUp(c *gin.Context) {
 	var newUser models.User	
 	c.BindJSON(&newUser);
 	if isEmpty(newUser.Email) || isEmpty(newUser.PasswordHash) || isEmpty(newUser.UserName) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "The server could not get the Email, password or user name. please check your request then try again L86"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "The server could not get the Email, password or user name. please check your request then try again L86"))
 	} else {
 		newUser.SetDefaults();
 		// Hash the password.
@@ -97,21 +97,21 @@ func Update(c *gin.Context) {
 			}
 
 			if Ok {
-				c.JSON(http.StatusOK, models.MakeServerResponse(200, "updated!"))
+				c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, "updated!"))
 				return
 			} else {
-				c.JSON(http.StatusOK, models.MakeServerResponse(500, "Something went wrong.! 143"))
+				c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "Something went wrong.! 143"))
 				return
 			}
 
 		} else {
 			// return error. invalid token.
-			c.JSON(http.StatusOK, models.MakeServerResponse(500, "The Token you have specified is invalid, try with other."))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "The Token you have specified is invalid, try with other."))
 			return
 		}
 	}
 	
-	c.JSON(http.StatusOK, models.MakeServerResponse(500, "No token was provided in the request. try agin with a token."))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "No token was provided in the request. try agin with a token."))
 }
 
 func NewPost(c *gin.Context) {
@@ -134,17 +134,17 @@ func NewPost(c *gin.Context) {
 	c.BindJSON(&post)
 	
 	if isEmpty(post.Token) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "no Token provided, try providing your secure token."))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "no Token provided, try providing your secure token."))
 		return
 	}
 
 	if post.Uuid == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "uuid field not present: Provide uuid"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "uuid field not present: Provide uuid"))
 		return
 	}
 
 	if isEmpty(post.Text) && isEmpty(post.Img) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "img and text are empty, provide some text for the post or an img"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "img and text are empty, provide some text for the post or an img"))
 		return
 	}
 
@@ -156,15 +156,15 @@ func NewPost(c *gin.Context) {
 		result := database.AddPost(post.Text, post.Img, post.Uuid)
 
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "the user was not added. problem in db."))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "the user was not added. problem in db."))
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(500, "invalid access token. try with a valid token."))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "invalid access token. try with a valid token."))
 }
 
 func DeletePost(c *gin.Context) {
@@ -186,12 +186,12 @@ func DeletePost(c *gin.Context) {
 	// - Uuid
 
 	if isEmpty(post.Token) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "A token is required {token: v}"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "A token is required {token: v}"))
 		return
 	}
 
 	if post.Uuid == 0  || post.PostID == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, "a required argument is messing, check the uuid and id_"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "a required argument is messing, check the uuid and id_"))
 		return
 	}
 
@@ -204,7 +204,7 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(500, "invalid access token. try with a valid token."))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, "invalid access token. try with a valid token."))
 }
 
 func AddCommentRoute(c *gin.Context) {
@@ -221,7 +221,7 @@ func AddCommentRoute(c *gin.Context) {
 	c.BindJSON(&CommentRoutePostedData)
 
 	if isEmpty(CommentRoutePostedData.Token) || CommentRoutePostedData.Uuid == 0 || CommentRoutePostedData.Post_id == 0 || isEmpty(CommentRoutePostedData.Text) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | post_id | text | uuid is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | post_id | text | uuid is Missing"))
 		return
 	}
 
@@ -232,15 +232,15 @@ func AddCommentRoute(c *gin.Context) {
 		result := database.Add_comment(CommentRoutePostedData.Uuid, CommentRoutePostedData.Text, CommentRoutePostedData.Post_id, AccessToken, CommentRoutePostedData.Post_owner_id)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, result.Data))
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "The token sent is not valid!"))
 }
 
 func AddLikeRoute(c *gin.Context) {
@@ -256,7 +256,7 @@ func AddLikeRoute(c *gin.Context) {
 	c.BindJSON(&LikeRoutePostedData)
 
 	if isEmpty(LikeRoutePostedData.Token) || LikeRoutePostedData.Uuid == 0 ||  LikeRoutePostedData.Post_id == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
 		return 
 	}
 
@@ -275,15 +275,15 @@ func AddLikeRoute(c *gin.Context) {
 			data.Uuid = LikeRoutePostedData.Uuid
 			data.User_ = database.GetUserById(data.Uuid)
 
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, result.Data))
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "The token sent is not valid!"))
 }
 
 func RemoveLikeRoute(c *gin.Context) {
@@ -292,7 +292,7 @@ func RemoveLikeRoute(c *gin.Context) {
 	c.BindJSON(&LikeRoutePostedData)
 
 	if isEmpty(LikeRoutePostedData.Token) || LikeRoutePostedData.Uuid == 0 ||  LikeRoutePostedData.Post_id == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | post_id | uuid is Missing"))
 		return 
 	}
 
@@ -303,15 +303,15 @@ func RemoveLikeRoute(c *gin.Context) {
 		result := database.Remove_like(LikeRoutePostedData.Uuid, LikeRoutePostedData.Post_id, AccessToken)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, result.Data))
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "The token sent is not valid!"))
 
 }
 
@@ -322,7 +322,7 @@ func FollowRoute(c *gin.Context) {
 	c.BindJSON(&UData)
 
 	if isEmpty(UData.UToken) || UData.Follower_id == 0 || UData.Followed_id == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
 		return 
 	}
 
@@ -339,15 +339,15 @@ func FollowRoute(c *gin.Context) {
 		result := database.Follow(UData.Follower_id, UData.Followed_id, AccessToken)
 		
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, result.Data))
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "The token sent is not valid!"))
 
 	// notImplemented(c);
 }
@@ -358,7 +358,7 @@ func UnfollowRoute(c *gin.Context) {
 	c.BindJSON(&UData)
 
 	if isEmpty(UData.UToken) || UData.Follower_id == 0 || UData.Followed_id == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | follower_id | followed_id is Missing"))
 		return 
 	}
 
@@ -375,16 +375,16 @@ func UnfollowRoute(c *gin.Context) {
 		result := database.Unfollow(UData.Follower_id, UData.Followed_id, AccessToken)
 
 		if result.Ok {
-			c.JSON(http.StatusOK, models.MakeServerResponse(200, result.Data))
+			c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, result.Data))
 			return
 		}
 		
-		c.JSON(http.StatusOK, models.MakeServerResponse(500, result.Data))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(500, result.Data))
 		
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "The token sent is not valid!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "The token sent is not valid!"))
 	// notImplemented(c);
 }
 
@@ -392,7 +392,7 @@ func GetUserDiscussionsRoute(c *gin.Context) {
 	var validation models.ValidationStructure;
 	c.BindJSON(&validation);
 	if validation.Uuid == 0 || isEmpty(validation.Token) {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | uuid is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | uuid is Missing"))
 		return
 	}
 
@@ -406,7 +406,7 @@ func GetUserDiscussionsRoute(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "Not authorized!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "Not authorized!"))
 }
 
 func GetUserDiscussionByIdRoute(c *gin.Context) {
@@ -414,7 +414,7 @@ func GetUserDiscussionByIdRoute(c *gin.Context) {
 	c.BindJSON(&validation);
 
 	if validation.Uuid == 0 || isEmpty(validation.Token) || validation.ConvId == 0 {
-		c.JSON(http.StatusOK, models.MakeServerResponse(400, "Bad request, token | uuid is Missing"))
+		c.JSON(http.StatusOK, models.MakeGenericServerResponse(400, "Bad request, token | uuid is Missing"))
 		return
 	}
 
@@ -426,20 +426,22 @@ func GetUserDiscussionByIdRoute(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.MakeServerResponse(401, "Not authorized!"))
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(401, "Not authorized!"))
 }
 
 func NewConversation(c *gin.Context) {
+	
 	/*
 	expects:
 		{
 			topic_id: int // Who send the message.
 			other_id: int // the recv of the message.
 		}
+
 	*/
 
 	var md models.UMessage;
 	c.BindJSON(&md);
 	New := database.CreateNewDiscussion(md.Topic_id, md.Other_id);
-	c.JSON(http.StatusOK, models.MakeServerResponse(200, New));
+	c.JSON(http.StatusOK, models.MakeGenericServerResponse(200, New));
 } 

@@ -15,6 +15,9 @@ const (
 )
 
 
+
+
+
 type ValidationStructure struct {
 	Token      	string      `json:"token"`
 	Uuid       	int      	`json:"uuid"`
@@ -26,6 +29,7 @@ type Discussion struct {
 	Fpair 		int 		`json:"fpair"`
 	Spair		int 		`json:"spair"`
 	Messages 	[]UMessage 	`json:"messages"`
+	MessageCount		int          `json:"message_count"`
 	TimeStamp 	time.Time   `json:"ts"`
 }
 

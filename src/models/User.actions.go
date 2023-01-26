@@ -48,3 +48,11 @@ type UserLogin struct {
 	Email    string `json:"Email"`
 	Token 	 string `json:"T"`
 }
+
+func (like *Like) EncodeToSocketResponse() SocketMessage {
+	return MakeSocketResp(LIKE, 200, like);
+}
+
+func (comment *Comment) EncodeToSocketResponse() SocketMessage {
+	return MakeSocketResp(COMMENT, 200, comment);
+}

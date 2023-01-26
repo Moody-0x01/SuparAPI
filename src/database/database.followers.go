@@ -124,13 +124,12 @@ func IsFollowing(followed int, follower int) bool {
 		fmt.Println(err)
 		return false
 	}
-
+	
 	var follower_id int;
-
 	for row.Next() {
 		row.Scan(&follower_id)
 		fmt.Println(follower_id)
 	}
 
-	return !(follower_id == 0)
+	return !(follower_id == 0);
 }
