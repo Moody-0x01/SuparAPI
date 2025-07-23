@@ -18,7 +18,7 @@ type Notification struct {
 	Id_       int      `json:"id"`
 	Text      string   `json:"text"`
 	Type      int      `json:"type"` 
-	Uuid      int      `json:"uuid"`
+	Uuid      int      `json:"user_id"`
 	Actorid   int      `json:"actorid"`
 	Seen      int      `json:"seen"`
 	Post_id   int      `json:"post_id"`

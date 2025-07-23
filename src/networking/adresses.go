@@ -54,8 +54,8 @@ func GetCurrentMachineIp() string {
     addr, err := net.LookupIP(host)
     
     if err != nil {
-	return ""
-    } 
+		return ""
+    }
     
     return addr[1].String()
 }

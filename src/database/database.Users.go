@@ -122,9 +122,9 @@ func GetUserByToken(Token string) (models.User, error) {
 	return User_, nil
 }
 
-func GetUsers(uuid interface{}) []models.AUser {
+func GetUsers(ID interface{}) []models.AUser {
 	var Users []models.AUser
-	switch uuid.(type) {
+	switch ID.(type) {
 		case int:
 			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS ORDER BY ID DESC")
 			defer row.Close()
@@ -138,7 +138,7 @@ func GetUsers(uuid interface{}) []models.AUser {
 
 			for row.Next() {
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-				temp.IsFollowed = IsFollowing(temp.Id_, uuid.(int))
+				temp.IsFollowed = IsFollowing(temp.Id_, ID.(int))
 				temp.Img = CheckCdnLink(temp.Img);
 				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)
@@ -177,11 +177,11 @@ func GetUsers(uuid interface{}) []models.AUser {
 	return Users	
 }
 
-func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
+func GetUsersByQuery(Q string, ID interface{}) []models.AUser {
 	var Users []models.AUser
 	var NewQ string = "%" + Q + "%"
 
-	switch uuid.(type) {
+	switch ID.(type) {
 		case int:
 			row, err := DATABASE.Query("SELECT ID, USERNAME, IMG, BG, BIO, ADDR FROM USERS WHERE USERNAME LIKE ? ORDER BY ID DESC", NewQ)
 
@@ -195,7 +195,7 @@ func GetUsersByQuery(Q string, uuid interface{}) []models.AUser {
 			for row.Next() {
 				var temp models.AUser
 				row.Scan(&temp.Id_, &temp.UserName, &temp.Img, &temp.Bg, &temp.Bio, &temp.Address)
-				temp.IsFollowed = IsFollowing(temp.Id_, int(uuid.(int)))
+				temp.IsFollowed = IsFollowing(temp.Id_, int(ID.(int)))
 				temp.Img = CheckCdnLink(temp.Img);
 				temp.Bg = CheckCdnLink(temp.Bg);
 				Users = append(Users, temp)	
@@ -288,15 +288,15 @@ func AddUser(user models.User) models.Response {
 		
 
 		/*------------Add To cdn-------------*/
-		var uuid = GetNextUID("Users")
+		var ID = GetNextUID("Users")
 
-		ok, img := cdn.AddUserAvatarToCdn(uuid, user.Img)
+		ok, img := cdn.AddUserAvatarToCdn(ID, user.Img)
 
 		if !ok {
 			return models.MakeGenericServerResponse(500, "cdn error, could not add avatar.")
 		}
 
-		ok, bg := cdn.AddUserBackgroundToCdn(uuid, user.Bg)
+		ok, bg := cdn.AddUserBackgroundToCdn(ID, user.Bg)
 
 		if !ok {
 			return models.MakeGenericServerResponse(500, "cdn error, could not add background.")
@@ -334,9 +334,9 @@ func AddUser(user models.User) models.Response {
 	return models.MakeGenericServerResponse(500, "This user already exists..")
 }
 
-func GetuuidByToken(Token string) (int, bool) {
+func GetIDByToken(Token string) (int, bool) {
 	
-	var uuid int
+	var ID int
 	row, err := DATABASE.Query("SELECT ID FROM USERS WHERE TOKEN=?", Token)
 	
 	defer row.Close()
@@ -347,10 +347,10 @@ func GetuuidByToken(Token string) (int, bool) {
 	}
 
 	for row.Next() {
-		row.Scan(&uuid);
+		row.Scan(&ID);
 	}
 
-	return uuid, true
+	return ID, true
 }
 
 func UpdateUser(field string, newValue string, Token string) models.Result {
@@ -361,10 +361,10 @@ func UpdateUser(field string, newValue string, Token string) models.Result {
 	switch field {
 		case "IMG":
 			Query = "UPDATE USERS SET IMG=? WHERE TOKEN=?"
-			uuid, OK := GetuuidByToken(Token)
+			ID, OK := GetIDByToken(Token)
 			
 			if OK {
-				OK, newValue = cdn.AddUserAvatarToCdn(uuid, newValue)
+				OK, newValue = cdn.AddUserAvatarToCdn(ID, newValue)
 				fmt.Println("path: ", newValue)
 				ok = OK
 			}
@@ -384,10 +384,10 @@ func UpdateUser(field string, newValue string, Token string) models.Result {
 			
 			Query = "UPDATE USERS SET BG=? WHERE TOKEN=?"
 			
-			uuid, OK := GetuuidByToken(Token)
+			ID, OK := GetIDByToken(Token)
 			
 			if OK {
-				OK, newValue = cdn.AddUserBackgroundToCdn(uuid, newValue)
+				OK, newValue = cdn.AddUserBackgroundToCdn(ID, newValue)
 				ok = OK
 			}
 

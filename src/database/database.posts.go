@@ -34,7 +34,7 @@ func DeleteUserPost(PostId int, uuid int, Token string) models.Response {
 func GetAllPosts() map[int]models.Post {
 	
 	Posts := make(map[int]models.Post);
-	row, err := DATABASE.Query("SELECT ID, USER_ID, Text, IMG, CreatedDate FROM POSTS ORDER BY ID DESC")
+	row, err := DATABASE.Query("SELECT ID, USER_ID, Text, IMG, CREATED_DATE FROM POSTS ORDER BY ID DESC")
 	
 	defer row.Close()
 
@@ -81,7 +81,7 @@ func GetUserPostById(id int) map[int]models.Post {
 	// A functions to use 
 	Posts := make(map[int]models.Post);
 	
-	row, err := DATABASE.Query("SELECT ID, Text, IMG, CreatedDate FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
+	row, err := DATABASE.Query("SELECT ID, Text, IMG, CREATED_DATE FROM POSTS WHERE USER_ID=? ORDER BY ID DESC", id)
 	
 	defer row.Close()
 
@@ -109,7 +109,7 @@ func GetUserPostById(id int) map[int]models.Post {
 
 func GetPostById(Post_id int) models.Post {
 	
-	row, err := DATABASE.Query("SELECT ID, Text, IMG, USER_ID, CreatedDate FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
+	row, err := DATABASE.Query("SELECT ID, Text, IMG, USER_ID, CREATED_DATE FROM POSTS WHERE ID=? ORDER BY ID DESC", Post_id)
 	
 	defer row.Close()
 	
@@ -157,7 +157,7 @@ func AddPost(Text string, Img string, uuid int) (models.Result) {
 
 	}
 
-	stmt, _ := DATABASE.Prepare("INSERT INTO POSTS(USER_ID, Text, IMG, CreatedDate) VALUES(?, ?, ?, datetime())")
+	stmt, _ := DATABASE.Prepare("INSERT INTO POSTS(USER_ID, TEXT, IMG, CREATED_DATE) VALUES(?, ?, ?, datetime())")
 	_, err := stmt.Exec(uuid, Text, Img)
 
 	if err != nil { return models.MakeServerResult(false, "could not add post. err L149") }
@@ -211,7 +211,7 @@ type Like struct {
     if ok {
 
     	if id == uuid {
-    		stmt, _ := DATABASE.Prepare("INSERT INTO COMMENTS(uuid, post_id, comment_text) VALUES(?, ?, ?)")
+    		stmt, _ := DATABASE.Prepare("INSERT INTO COMMENTS(ID, POST_ID, COMMENT_TEXT) VALUES(?, ?, ?)")
 			_, err := stmt.Exec(uuid, PostId, commentText)
 
 			if err != nil {
@@ -253,7 +253,7 @@ func Add_like(uuid int, PostId int, Token string, PostOwnerId int) models.Result
 
 	if ok {
 		if id == uuid {
-			stmt, _ := DATABASE.Prepare("INSERT INTO LIKES(uuid, post_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO LIKES(USER_ID, POST_ID) VALUES(?, ?)")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -293,7 +293,7 @@ func Remove_like(uuid int, PostId int, Token string) models.Result {
 
 	if ok {
 		if id == uuid {
-			stmt, _ := DATABASE.Prepare("DELETE FROM LIKES WHERE uuid=? AND post_id=?")
+			stmt, _ := DATABASE.Prepare("DELETE FROM LIKES WHERE USER_ID=? AND POST_ID=?")
 			_, err := stmt.Exec(uuid, PostId)
 
 			if err != nil {
@@ -321,7 +321,7 @@ func Get_comments(PostId int) []models.Comment {
 	
 	var comments []models.Comment
 
-	row, err := DATABASE.Query("SELECT ID, uuid, comment_text FROM COMMENTS WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, USER_ID, COMMENT_TEXT FROM COMMENTS WHERE POST_ID=? ORDER BY ID DESC", PostId)
 	
 	defer row.Close()
 
@@ -350,7 +350,7 @@ func Get_likes(PostId int) []models.Like {
 
 	var likes []models.Like
 
-	row, err := DATABASE.Query("SELECT ID, uuid FROM LIKES WHERE post_id=? ORDER BY ID DESC", PostId)
+	row, err := DATABASE.Query("SELECT ID, USER_ID FROM LIKES WHERE POST_ID=? ORDER BY ID DESC", PostId)
 
 	defer row.Close()
 

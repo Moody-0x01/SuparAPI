@@ -10,6 +10,7 @@ import (
 	"github.com/Moody0101-X/Go_Api/database"
 	"github.com/Moody0101-X/Go_Api/networking"
 	"github.com/Moody0101-X/Go_Api/models"
+	"github.com/Moody0101-X/Go_Api/cdn"
 )
 
 func RequestCancelRecover() gin.HandlerFunc {
@@ -33,7 +34,7 @@ func RequestCancelRecover() gin.HandlerFunc {
 func run() {
 	// GET THE PORT :)
 	var PORT string = models.GetEnv("PORT")
-	var CDN string = "http://" + networking.GetCurrentMachineIp() + ":8500"
+	var CDN string = "http://" + cdn.GetCdnLink("./cdn.txt") + ":8500"
 	var APP_LINK string = "http://" + networking.GetCurrentMachineIp() + PORT
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -41,10 +42,10 @@ func run() {
 	router.Use(gin.Logger(), RequestCancelRecover())
 	// HTML/JS/CSS/IMG loaders
 	
-	router.Static("/static", "./public/static")
-	router.Static("/img", "./public/img")
-	router.Static("/Global.css", "./public/Global.css")
-	router.LoadHTMLGlob("public/*.html")
+	// router.Static("/static", "./public/static")
+	// router.Static("/img", "./public/img")
+	// router.Static("/Global.css", "./public/Global.css")
+	// router.LoadHTMLGlob("public/*.html")
 	
 	// POST routes.
 	router.POST("/v2/login", routes.Login) // login and get a token for the updating/creation/deletion of personal data.

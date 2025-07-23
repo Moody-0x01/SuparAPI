@@ -28,7 +28,7 @@ func CreateNewDiscussion(topic_id int, other_id int) (conversation_id int) {
 	conversation_id = DiscussionExists(topic_id, other_id);
 	
 	if conversation_id == -1 {
-		stmt, _ := DATABASE.Prepare("INSERT INTO CONVERSATIONS(Fpair, Spair, timestamp) VALUES(?, ?, datetime())")
+		stmt, _ := DATABASE.Prepare("INSERT INTO CONVERSATIONS(FPAIR, SPAIR, TIMESTAMP) VALUES(?, ?, datetime())")
 		_, err := stmt.Exec(topic_id, other_id)
 		if err != nil {
 
@@ -47,7 +47,7 @@ func DiscussionExists(topic_id int, other_id int) int {
 	
 	var conversation_id int = -1;
 
-	row, err := DATABASE.Query("SELECT ID FROM CONVERSATIONS WHERE Fpair=? AND Spair=? OR Fpair=? AND Spair=?", topic_id, other_id, other_id, topic_id)
+	row, err := DATABASE.Query("SELECT ID FROM CONVERSATIONS WHERE FPAIR=? AND SPAIR=? OR FPAIR=? AND SPAIR=?", topic_id, other_id, other_id, topic_id)
 				
 	if err != nil {
 		return conversation_id;
@@ -78,7 +78,7 @@ func SendMessage(client *models.Client, Message models.UMessage) {
 	//TODO we add the message to db.
 	// Message.Log();
 
-	stmt, _ := DATABASE.Prepare("INSERT INTO MESSAGES(Msg, MsgType, Coversation_id, topic_id, other_id, ts, seen) VALUES(?, ?, ?, ?, ?, datetime(), 0)")
+	stmt, _ := DATABASE.Prepare("INSERT INTO MESSAGES(MSG, MSGTYPE, COVERSATION_ID, TOPIC_ID, OTHER_ID, TS, SEEN) VALUES(?, ?, ?, ?, ?, datetime(), 0)")
 	_, err := stmt.Exec(Message.Data.Text, Message.Data.MsgType, Message.ConversationId, Message.Topic_id, Message.Other_id)
 	
 	if err != nil {
@@ -107,7 +107,7 @@ func GetUserDiscussions(User_id int, Token string) models.Response {
 	
 	if ok {
 		if id == User_id {
-			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE Fpair=? OR Spair=? ORDER BY ID DESC", User_id, User_id);
+			row, err := DATABASE.Query("SELECT * FROM CONVERSATIONS WHERE FPAIR=? OR SPAIR=? ORDER BY ID DESC", User_id, User_id);
 			
 			if err != nil {
 				return models.MakeServerResponse(500, "Internal serevr error");
@@ -138,7 +138,7 @@ func GetUserDiscussions(User_id int, Token string) models.Response {
 func GetMessagesByConvId(id int) []models.UMessage {
 	
 	var Messages []models.UMessage;
-	row, err := DATABASE.Query("SELECT ID, Msg, MsgType, topic_id, other_id, ts FROM MESSAGES WHERE Coversation_id=? ORDER BY ID ASC", id);
+	row, err := DATABASE.Query("SELECT ID, MSG, MSGTYPE, TOPIC_ID, OTHER_ID, TS FROM MESSAGES WHERE COVERSATION_ID=? ORDER BY ID ASC", id);
 	
 	if err != nil {	
 		fmt.Println("err in retrv user messages: ")

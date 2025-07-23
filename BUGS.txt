@@ -1,0 +1,2 @@
+[] - Notification are neither sent nor received properly.
+[] - data management is all over the place... in react..

@@ -6,13 +6,11 @@ import (
 )
 	
 func Follow(follower_id int, followed_id int, Token string) models.Result {
-	// "INSERT  INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)"
-
 	id, ok := GetUserIdByToken(Token)
 	
 	if ok {
 		if id == follower_id {
-			stmt, _ := DATABASE.Prepare("INSERT INTO FOLLOWERS(follower_id, followed_id) VALUES(?, ?)")
+			stmt, _ := DATABASE.Prepare("INSERT INTO FOLLOWERS(FOLLOWER_ID, FOLLOWED_ID) VALUES(?, ?)")
 			_, err := stmt.Exec(follower_id, followed_id)
 
 			if err != nil {
@@ -60,7 +58,7 @@ func GetFollowers(followed int) []int {
 	// people who is following followed.
 	var followers []int;
 
-	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC", followed)
+	row, err := DATABASE.Query("SELECT FOLLOWER_ID FROM FOLLOWERS WHERE FOLLOWED_ID=? ORDER BY ID DESC", followed)
 	
 	//  CREATE TABLE FOLLOWERS (
  	//        ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,12 +73,12 @@ func GetFollowers(followed int) []int {
 		return followers
 	}
 
-	var uuid int
+	var ID int
 	var index = 0;
 	
 	for row.Next() {
-		row.Scan(&uuid)
-		followers = append(followers, uuid)
+		row.Scan(&ID)
+		followers = append(followers, ID)
 		index++
 	}
 
@@ -93,7 +91,7 @@ func GetFollowings(following int) []int {
 
 	var followers []int;
 
-	row, err := DATABASE.Query("SELECT followed_id FROM FOLLOWERS WHERE follower_id=? ORDER BY ID DESC", following)
+	row, err := DATABASE.Query("SELECT FOLLOWED_ID FROM FOLLOWERS WHERE FOLLOWER_ID=? ORDER BY ID DESC", following)
 	
 	defer row.Close()
 
@@ -102,11 +100,11 @@ func GetFollowings(following int) []int {
 		return followers
 	}
 
-	var uuid int
+	var ID int
 
 	for row.Next() {
-		row.Scan(&uuid)
-		followers = append(followers, uuid)
+		row.Scan(&ID)
+		followers = append(followers, ID)
 	}
 
 	return followers
@@ -116,7 +114,7 @@ func IsFollowing(followed int, follower int) bool {
 	// "SELECT * FROM FOLLOWERS WHERE followed_id=? ORDER BY ID DESC"
 	// people who followed is followingg..
 
-	row, err := DATABASE.Query("SELECT follower_id FROM FOLLOWERS WHERE follower_id=? AND followed_id=? ORDER BY ID DESC", follower, followed)
+	row, err := DATABASE.Query("SELECT FOLLOWER_ID FROM FOLLOWERS WHERE FOLLOWER_ID=? AND FOLLOWED_ID=? ORDER BY ID DESC", follower, followed)
 	
 	defer row.Close()
 

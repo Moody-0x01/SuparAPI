@@ -1,7 +1,4 @@
 package models;
-import "github.com/Moody0101-X/Go_Api/networking"
-
-
 
 var (
 	FOLLOW                     = 0
@@ -16,5 +13,5 @@ var (
     DefaultUserBio             = "Wait for it to load :)"
     DefaultUserAddress         = "Everywhere"
 
-    CDN_API                    = "http://" + networking.GetCurrentMachineIp() + ":8500"
+    CDN_API                    = "http://10.32.132.112:8500"
 )

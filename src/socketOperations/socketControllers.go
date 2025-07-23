@@ -37,9 +37,7 @@ func MainSocketHandler(c *gin.Context) {
 		fmt.Println("err: ", err)
 		return 
 	}
-
 	client, ok := models.ClientPool.AddClient(ws.RemoteAddr().String(), uuid_, ws);
-
 	if(ok) {
 		go database.HandleClientConnection(client)
 	} else { fmt.Println("Could not register client with uuid: ", uuid_); }
